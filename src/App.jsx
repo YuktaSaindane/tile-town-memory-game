@@ -1,67 +1,141 @@
-import React from 'react'
+import React, { useState } from 'react'
+
+// Game states
+const GAME_STATES = {
+  WELCOME: 'welcome',
+  PLAYING: 'playing',
+  INSTRUCTIONS: 'instructions'
+}
 
 function App() {
+  const [gameState, setGameState] = useState(GAME_STATES.WELCOME)
+  
+  const startGame = () => {
+    setGameState(GAME_STATES.PLAYING)
+  }
+  
+  const showInstructions = () => {
+    setGameState(GAME_STATES.INSTRUCTIONS)
+  }
+  
+  const backToWelcome = () => {
+    setGameState(GAME_STATES.WELCOME)
+  }
+    if (gameState === GAME_STATES.INSTRUCTIONS) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-100 via-purple-50 to-indigo-100">
+          <div className="absolute inset-0 bg-white/30"></div>
+        </div>
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-lg w-full">
+            <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">How to Play</h2>
+            <div className="space-y-4 text-slate-700">
+              <div className="flex items-start gap-3">
+                <span className="text-xl">👀</span>
+                <p><strong>Study the pattern:</strong> Watch carefully as creatures appear on the grid for a few seconds</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">🧠</span>
+                <p><strong>Remember the layout:</strong> The grid will go blank - remember where each creature was!</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">🖱️</span>
+                <p><strong>Recreate the pattern:</strong> Click tiles to place creatures in the correct positions</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">🏆</span>
+                <p><strong>Complete the level:</strong> Get all creatures home to unlock the next challenge!</p>
+              </div>
+            </div>
+            <button onClick={backToWelcome} className="w-full mt-6 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors">
+              Got it!
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (gameState === GAME_STATES.PLAYING) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-100 via-purple-50 to-indigo-100">
+          <div className="absolute inset-0 bg-white/30"></div>
+        </div>
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-2xl w-full text-center">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">🐸 Froggy's Pond</h2>
+              <p className="text-slate-600">Remember the pattern and help Froggy find his lily pad!</p>
+            </div>
+            
+            {/* Placeholder for game grid - we'll build this next */}
+            <div className="bg-slate-100 rounded-xl p-8 mb-6">
+              <div className="text-6xl mb-4">🚧</div>
+              <p className="text-slate-600">Game grid coming soon...</p>
+            </div>
+            
+            <button onClick={backToWelcome} className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 px-6 rounded-lg transition-colors">
+              ← Back to Menu
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] animate-pulse"></div>
+      {/* Clean Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-violet-100 via-purple-50 to-indigo-100">
+        <div className="absolute inset-0 bg-white/30"></div>
       </div>
       
-      {/* Floating Emojis */}
-      <div className="absolute top-10 left-10 text-4xl animate-bounce">🐸</div>
-      <div className="absolute top-20 right-20 text-3xl animate-pulse">⭐</div>
-      <div className="absolute bottom-20 left-20 text-3xl animate-bounce delay-500">🐱</div>
-      <div className="absolute bottom-10 right-10 text-4xl animate-pulse delay-300">🐝</div>
-      
-      {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 max-w-lg w-full text-center transform hover:scale-105 transition-all duration-300">
-          {/* Title Section */}
-          <div className="mb-8">
-            <div className="text-6xl mb-4 animate-bounce">🏘️</div>
-            <h1 className="text-5xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-3">
-              TILE TOWN
-            </h1>
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-2xl">⚡</span>
-              <p className="text-2xl font-bold text-orange-500">
-                Save the Creatures!
+        {/* Main Content */}
+         <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+           <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-md w-full text-center">
+            {/* Title Section */}
+            <div className="mb-8">
+              <div className="text-5xl mb-4">🏘️</div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-2">
+                Tile Town
+              </h1>
+              <p className="text-lg text-slate-600 font-medium">
+                Save the Creatures
               </p>
-              <span className="text-2xl">⚡</span>
             </div>
-          </div>
           
-          {/* Story Section */}
-          <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border-2 border-dashed border-purple-300">
-            <p className="text-gray-700 leading-relaxed font-medium">
-              🧙‍♂️ The evil wizard has scattered our cute creatures across magical tiles! 
-              <br/>
-              <span className="text-purple-600 font-bold">Remember the patterns</span> and 
-              <span className="text-green-600 font-bold"> bring them home!</span>
-            </p>
-          </div>
+                      {/* Story Section */}
+            <div className="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <p className="text-slate-700 leading-relaxed">
+                An evil wizard has scattered the town's creatures across magical tiles. 
+                <span className="font-semibold text-slate-900"> Remember the patterns</span> and bring them home!
+              </p>
+            </div>
 
           {/* Action Buttons */}
-          <div className="space-y-4 mb-6">
-            <button className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:from-green-600 hover:via-emerald-600 hover:to-teal-600 text-white font-black text-xl py-5 px-8 rounded-2xl transform transition-all duration-200 hover:scale-110 hover:shadow-2xl shadow-lg border-4 border-white active:scale-95">
-              🎮 START ADVENTURE
+          <div className="space-y-3 mb-6">
+            <button onClick={startGame} className="group w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold text-lg py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/25 transform hover:-translate-y-1 active:translate-y-0 active:shadow-lg">
+              <span className="flex items-center justify-center gap-2">
+                <span className="group-hover:scale-110 transition-transform">🎮</span>
+                Start Playing
+              </span>
             </button>
             
-            <button className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 hover:from-purple-600 hover:via-pink-600 hover:to-rose-600 text-white font-bold text-lg py-4 px-8 rounded-2xl transform transition-all duration-200 hover:scale-105 hover:shadow-xl shadow-lg border-2 border-white/50">
-              📚 How to Play
+            <button onClick={showInstructions} className="w-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white font-medium py-3 px-8 rounded-xl transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5">
+              How to Play
             </button>
           </div>
 
-          {/* Level Indicator */}
-          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl p-4 border-2 border-orange-300">
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-2xl">🏆</span>
-              <span className="font-bold text-orange-700">Next Adventure:</span>
-              <span className="text-xl">🐸 Froggy's Pond</span>
+                      {/* Level Indicator */}
+            <div className="bg-violet-50 rounded-xl p-4 border border-violet-200">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <span className="text-lg">🐸</span>
+                <span className="font-semibold text-slate-800">Level 1: Froggy's Pond</span>
+              </div>
+              <div className="text-sm text-slate-600">4×4 Grid • Memory Challenge</div>
             </div>
-            <div className="text-sm text-orange-600 mt-1">4x4 Grid • Memory Challenge</div>
-          </div>
         </div>
       </div>
     </div>
