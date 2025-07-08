@@ -1,5 +1,26 @@
 import React, { useState, useEffect } from 'react'
 
+// Add confetti animation styles
+const confettiStyles = `
+  @keyframes confetti-fall {
+    0% {
+      transform: translateY(-100vh) rotateZ(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) rotateZ(720deg);
+      opacity: 0;
+    }
+  }
+`
+
+// Inject styles into document head
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style')
+  styleSheet.textContent = confettiStyles
+  document.head.appendChild(styleSheet)
+}
+
 // Game states
 const GAME_STATES = {
   WELCOME: 'welcome',
@@ -82,6 +103,8 @@ function App() {
   const [userPath, setUserPath] = useState([]) // Track user's selected path
   const [creaturePosition, setCreaturePosition] = useState(LEVEL_1.start) // For animation
   const [showSuccessEffect, setShowSuccessEffect] = useState(false) // For sparkly success animation
+  const [isDrawing, setIsDrawing] = useState(false) // Track if user is actively drawing
+  const [drawMode, setDrawMode] = useState('add') // 'add' or 'remove' - what happens when dragging
   
   const startGame = () => {
     setGameState(GAME_STATES.PLAYING)
@@ -93,6 +116,8 @@ function App() {
     setUserPath([])
     setCreaturePosition(LEVEL_1.start)
     setShowSuccessEffect(false)
+    setIsDrawing(false)
+    setDrawMode('add')
   }
   
   const showInstructions = () => {
@@ -104,7 +129,7 @@ function App() {
   }
   
   // Tile component - handles different tile states
-  const Tile = ({ tile, onClick, gamePhase }) => {
+  const Tile = ({ tile, onClick, onMouseDown, onMouseEnter, onMouseUp, gamePhase }) => {
     const isClickable = gamePhase === GAME_PHASES.PATH_SELECTION && !tile.isStart && !tile.isGoal && !tile.isObstacle
     
     // Determine tile appearance based on state
@@ -145,15 +170,30 @@ function App() {
     return (
       <button
         onClick={() => onClick && onClick(tile.x, tile.y)}
+        onMouseDown={() => onMouseDown && onMouseDown(tile.x, tile.y)}
+        onMouseEnter={() => onMouseEnter && onMouseEnter(tile.x, tile.y)}
+        onMouseUp={() => onMouseUp && onMouseUp()}
+        onTouchStart={() => onMouseDown && onMouseDown(tile.x, tile.y)}
+        onTouchMove={(e) => {
+          e.preventDefault()
+          const touch = e.touches[0]
+          const element = document.elementFromPoint(touch.clientX, touch.clientY)
+          if (element && element.dataset && element.dataset.coords) {
+            const [x, y] = element.dataset.coords.split(',').map(Number)
+            onMouseEnter && onMouseEnter(x, y)
+          }
+        }}
+        onTouchEnd={() => onMouseUp && onMouseUp()}
+        data-coords={`${tile.x},${tile.y}`}
         disabled={!isClickable}
         className={`
-          w-16 h-16 text-xl rounded-lg border-2 transition-all duration-200
+          w-16 h-16 text-xl rounded-lg border-2 transition-all duration-150
           ${bgColor} ${borderColor} ${textColor}
           ${isClickable 
-            ? 'hover:scale-105 hover:shadow-md cursor-pointer' 
+            ? 'hover:scale-105 hover:shadow-md cursor-pointer active:scale-95' 
             : 'cursor-default'
           }
-          flex items-center justify-center font-bold
+          flex items-center justify-center font-bold select-none
         `}
       >
         {content}
@@ -162,14 +202,17 @@ function App() {
   }
   
   // Grid component
-  const Grid = ({ grid, onTileClick, gamePhase }) => (
-    <div className="grid grid-cols-4 gap-2 p-4 bg-slate-200 rounded-xl">
+  const Grid = ({ grid, onTileClick, onTileMouseDown, onTileMouseEnter, onTileMouseUp, gamePhase }) => (
+    <div className="grid grid-cols-4 gap-2 p-4 bg-slate-200 rounded-xl select-none">
       {grid.map((row, rowIndex) =>
         row.map((tile, colIndex) => (
           <Tile
             key={`${rowIndex}-${colIndex}`}
             tile={tile}
             onClick={onTileClick}
+            onMouseDown={onTileMouseDown}
+            onMouseEnter={onTileMouseEnter}
+            onMouseUp={onTileMouseUp}
             gamePhase={gamePhase}
           />
         ))
@@ -177,7 +220,7 @@ function App() {
     </div>
   )
   
-  // Handle tile clicks during path selection phase
+  // Handle tile interactions during path selection phase
   const handleTileClick = (x, y) => {
     if (gamePhase !== GAME_PHASES.PATH_SELECTION) return
     
@@ -200,6 +243,57 @@ function App() {
     } else {
       // Remove from path
       setUserPath(userPath.filter(p => !(p.x === x && p.y === y)))
+    }
+    
+    setGrid(newGrid)
+  }
+
+  // Handle mouse down - start drawing
+  const handleTileMouseDown = (x, y) => {
+    if (gamePhase !== GAME_PHASES.PATH_SELECTION) return
+    
+    const tile = grid[y][x]
+    if (tile.isStart || tile.isGoal || tile.isObstacle) return
+    
+    setIsDrawing(true)
+    // Determine draw mode based on current tile state
+    setDrawMode(tile.isSelectedByUser ? 'remove' : 'add')
+    
+    // Apply the action to this tile
+    handleTileAction(x, y)
+  }
+
+  // Handle mouse enter - continue drawing if mouse is down
+  const handleTileMouseEnter = (x, y) => {
+    if (!isDrawing || gamePhase !== GAME_PHASES.PATH_SELECTION) return
+    
+    const tile = grid[y][x]
+    if (tile.isStart || tile.isGoal || tile.isObstacle) return
+    
+    handleTileAction(x, y)
+  }
+
+  // Handle mouse up - stop drawing
+  const handleTileMouseUp = () => {
+    setIsDrawing(false)
+  }
+
+  // Apply add/remove action to a tile
+  const handleTileAction = (x, y) => {
+    const newGrid = [...grid]
+    const tile = newGrid[y][x]
+    const pathCoord = { x, y }
+    
+    if (drawMode === 'add' && !tile.isSelectedByUser) {
+      // Add tile to selection
+      tile.isSelectedByUser = true
+      if (!userPath.some(p => p.x === x && p.y === y)) {
+        setUserPath(prev => [...prev, pathCoord])
+      }
+    } else if (drawMode === 'remove' && tile.isSelectedByUser) {
+      // Remove tile from selection
+      tile.isSelectedByUser = false
+      setUserPath(prev => prev.filter(p => !(p.x === x && p.y === y)))
     }
     
     setGrid(newGrid)
@@ -300,6 +394,23 @@ function App() {
 
     return () => clearInterval(timer)
   }, [gameState, gamePhase, grid])
+
+  // Global mouse up handler to stop drawing if mouse released outside grid
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDrawing) {
+        setIsDrawing(false)
+      }
+    }
+
+    document.addEventListener('mouseup', handleGlobalMouseUp)
+    document.addEventListener('touchend', handleGlobalMouseUp)
+    
+    return () => {
+      document.removeEventListener('mouseup', handleGlobalMouseUp)
+      document.removeEventListener('touchend', handleGlobalMouseUp)
+    }
+  }, [isDrawing])
     if (gameState === GAME_STATES.INSTRUCTIONS) {
     return (
       <div className="min-h-screen relative overflow-hidden">
@@ -324,7 +435,7 @@ function App() {
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-xl">🖱️</span>
-                <p><strong>Draw the path:</strong> Click tiles to recreate the route from memory</p>
+                <p><strong>Draw the path:</strong> Click or drag across tiles to smoothly recreate the route</p>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-xl">🎉</span>
@@ -347,21 +458,59 @@ function App() {
           <div className="absolute inset-0 bg-white/30"></div>
         </div>
         
-        {/* Success Effect Overlay */}
+        {/* Confetti Celebration Effect */}
         {showSuccessEffect && (
-          <div className="absolute inset-0 z-20 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-200/20 via-green-200/20 to-blue-200/20 animate-pulse"></div>
-            {/* Floating sparkles */}
-            <div className="absolute top-1/4 left-1/4 text-4xl animate-bounce" style={{animationDelay: '0s'}}>✨</div>
-            <div className="absolute top-1/3 right-1/4 text-3xl animate-bounce" style={{animationDelay: '0.2s'}}>🌟</div>
-            <div className="absolute bottom-1/3 left-1/3 text-4xl animate-bounce" style={{animationDelay: '0.4s'}}>💫</div>
-            <div className="absolute top-1/2 right-1/3 text-3xl animate-bounce" style={{animationDelay: '0.6s'}}>⭐</div>
-            <div className="absolute bottom-1/4 right-1/5 text-4xl animate-bounce" style={{animationDelay: '0.8s'}}>✨</div>
-            <div className="absolute top-1/5 left-1/2 text-3xl animate-bounce" style={{animationDelay: '1s'}}>🌟</div>
-            {/* Success text */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="text-6xl font-bold text-yellow-500 animate-pulse">🎉 PERFECT! 🎉</div>
+          <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
+            {/* Massive Confetti Rain */}
+            <div className="absolute top-0 left-0 w-full">
+              {/* Row 1 - Left side */}
+              <div className="absolute top-0 left-[5%] w-3 h-3 bg-red-500" style={{animation: 'confetti-fall 2s linear infinite', animationDelay: '0s'}}></div>
+              <div className="absolute top-0 left-[8%] w-2 h-4 bg-blue-500 rounded" style={{animation: 'confetti-fall 2.2s linear infinite', animationDelay: '0.1s'}}></div>
+              <div className="absolute top-0 left-[12%] w-4 h-2 bg-yellow-500" style={{animation: 'confetti-fall 1.8s linear infinite', animationDelay: '0.2s'}}></div>
+              <div className="absolute top-0 left-[16%] w-3 h-3 bg-green-500 rounded-full" style={{animation: 'confetti-fall 2.1s linear infinite', animationDelay: '0.3s'}}></div>
+              <div className="absolute top-0 left-[20%] w-2 h-5 bg-purple-500" style={{animation: 'confetti-fall 1.9s linear infinite', animationDelay: '0.4s'}}></div>
+              <div className="absolute top-0 left-[24%] w-4 h-3 bg-pink-500 rounded" style={{animation: 'confetti-fall 2.3s linear infinite', animationDelay: '0.5s'}}></div>
+              <div className="absolute top-0 left-[28%] w-3 h-3 bg-orange-500 rounded-full" style={{animation: 'confetti-fall 2s linear infinite', animationDelay: '0.6s'}}></div>
+              <div className="absolute top-0 left-[32%] w-2 h-4 bg-cyan-500" style={{animation: 'confetti-fall 1.7s linear infinite', animationDelay: '0.7s'}}></div>
+              <div className="absolute top-0 left-[36%] w-4 h-2 bg-lime-500 rounded" style={{animation: 'confetti-fall 2.4s linear infinite', animationDelay: '0.8s'}}></div>
+              <div className="absolute top-0 left-[40%] w-3 h-3 bg-indigo-500" style={{animation: 'confetti-fall 2.2s linear infinite', animationDelay: '0.9s'}}></div>
+              
+              {/* Row 2 - Middle */}
+              <div className="absolute top-0 left-[44%] w-2 h-3 bg-rose-500 rounded-full" style={{animation: 'confetti-fall 1.8s linear infinite', animationDelay: '1s'}}></div>
+              <div className="absolute top-0 left-[48%] w-4 h-4 bg-emerald-500" style={{animation: 'confetti-fall 2.1s linear infinite', animationDelay: '1.1s'}}></div>
+              <div className="absolute top-0 left-[52%] w-3 h-2 bg-amber-500 rounded" style={{animation: 'confetti-fall 1.9s linear infinite', animationDelay: '1.2s'}}></div>
+              <div className="absolute top-0 left-[56%] w-2 h-2 bg-teal-500 rounded-full" style={{animation: 'confetti-fall 2.3s linear infinite', animationDelay: '1.3s'}}></div>
+              <div className="absolute top-0 left-[60%] w-3 h-4 bg-violet-500" style={{animation: 'confetti-fall 2s linear infinite', animationDelay: '1.4s'}}></div>
+              <div className="absolute top-0 left-[64%] w-4 h-3 bg-red-400 rounded" style={{animation: 'confetti-fall 1.8s linear infinite', animationDelay: '1.5s'}}></div>
+              <div className="absolute top-0 left-[68%] w-2 h-5 bg-blue-400" style={{animation: 'confetti-fall 2.2s linear infinite', animationDelay: '1.6s'}}></div>
+              <div className="absolute top-0 left-[72%] w-3 h-3 bg-green-400 rounded-full" style={{animation: 'confetti-fall 1.7s linear infinite', animationDelay: '1.7s'}}></div>
+              <div className="absolute top-0 left-[76%] w-4 h-2 bg-yellow-400 rounded" style={{animation: 'confetti-fall 2.4s linear infinite', animationDelay: '1.8s'}}></div>
+              <div className="absolute top-0 left-[80%] w-2 h-4 bg-purple-400" style={{animation: 'confetti-fall 1.9s linear infinite', animationDelay: '1.9s'}}></div>
+              
+              {/* Row 3 - Right side */}
+              <div className="absolute top-0 left-[84%] w-3 h-3 bg-pink-400 rounded-full" style={{animation: 'confetti-fall 2.1s linear infinite', animationDelay: '2s'}}></div>
+              <div className="absolute top-0 left-[88%] w-4 h-3 bg-orange-400 rounded" style={{animation: 'confetti-fall 1.8s linear infinite', animationDelay: '2.1s'}}></div>
+              <div className="absolute top-0 left-[92%] w-2 h-2 bg-cyan-400 rounded-full" style={{animation: 'confetti-fall 2.3s linear infinite', animationDelay: '2.2s'}}></div>
+              <div className="absolute top-0 left-[96%] w-3 h-4 bg-lime-400" style={{animation: 'confetti-fall 2s linear infinite', animationDelay: '2.3s'}}></div>
+              
+              {/* Additional scattered pieces */}
+              <div className="absolute top-0 left-[15%] w-2 h-3 bg-fuchsia-500 rounded" style={{animation: 'confetti-fall 1.6s linear infinite', animationDelay: '0.5s'}}></div>
+              <div className="absolute top-0 left-[35%] w-3 h-2 bg-sky-500" style={{animation: 'confetti-fall 2.5s linear infinite', animationDelay: '1.2s'}}></div>
+              <div className="absolute top-0 left-[55%] w-4 h-4 bg-red-600 rounded-full" style={{animation: 'confetti-fall 1.9s linear infinite', animationDelay: '0.8s'}}></div>
+              <div className="absolute top-0 left-[75%] w-2 h-5 bg-emerald-600" style={{animation: 'confetti-fall 2.1s linear infinite', animationDelay: '1.6s'}}></div>
+              <div className="absolute top-0 left-[25%] w-3 h-3 bg-violet-600 rounded" style={{animation: 'confetti-fall 1.7s linear infinite', animationDelay: '0.3s'}}></div>
+              <div className="absolute top-0 left-[45%] w-4 h-2 bg-amber-600 rounded-full" style={{animation: 'confetti-fall 2.4s linear infinite', animationDelay: '1.9s'}}></div>
+              <div className="absolute top-0 left-[65%] w-2 h-4 bg-rose-600" style={{animation: 'confetti-fall 1.8s linear infinite', animationDelay: '0.7s'}}></div>
+              <div className="absolute top-0 left-[85%] w-3 h-3 bg-teal-600 rounded" style={{animation: 'confetti-fall 2.2s linear infinite', animationDelay: '1.4s'}}></div>
             </div>
+            
+            {/* Celebration Emojis Popping */}
+            <div className="absolute top-1/2 left-1/5 text-3xl animate-bounce" style={{animationDelay: '0s'}}>🎉</div>
+            <div className="absolute top-2/3 right-1/5 text-3xl animate-bounce" style={{animationDelay: '0.3s'}}>🥳</div>
+            <div className="absolute top-1/3 left-1/2 text-3xl animate-bounce" style={{animationDelay: '0.6s'}}>🎊</div>
+            <div className="absolute bottom-1/4 left-3/4 text-3xl animate-bounce" style={{animationDelay: '0.9s'}}>🌟</div>
+            <div className="absolute top-1/4 right-1/3 text-3xl animate-bounce" style={{animationDelay: '0.4s'}}>🎉</div>
+            <div className="absolute bottom-1/3 left-1/4 text-3xl animate-bounce" style={{animationDelay: '0.7s'}}>🎊</div>
           </div>
         )}
         
@@ -378,9 +527,9 @@ function App() {
               )}
               {gamePhase === GAME_PHASES.PATH_SELECTION && (
                 <div>
-                  <p className="text-slate-600 mb-2">Click tiles to recreate the path from memory!</p>
+                  <p className="text-slate-600 mb-2">Draw the path from memory! Click or drag across tiles.</p>
                   <div className="text-2xl font-bold text-orange-600 mb-2">⏰ {selectionTimeLeft}s</div>
-                  <p className="text-sm text-slate-500">💡 Green tiles = your path. Click again to deselect.</p>
+                  <p className="text-sm text-slate-500">💡 Green tiles = your path. Drag to add/remove smoothly!</p>
                 </div>
               )}
               {gamePhase === GAME_PHASES.CREATURE_MOVING && (
@@ -404,7 +553,14 @@ function App() {
             
             {/* Game Grid */}
             <div className="mb-6 flex justify-center">
-              <Grid grid={grid} onTileClick={handleTileClick} gamePhase={gamePhase} />
+              <Grid 
+                grid={grid} 
+                onTileClick={handleTileClick}
+                onTileMouseDown={handleTileMouseDown}
+                onTileMouseEnter={handleTileMouseEnter}
+                onTileMouseUp={handleTileMouseUp}
+                gamePhase={gamePhase} 
+              />
             </div>
             
             {/* Path Legend */}
