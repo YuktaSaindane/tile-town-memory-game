@@ -28,7 +28,18 @@ const LEVEL_1 = {
     { x: 1, y: 1 },
     { x: 2, y: 1 }
   ],
-  viewTime: 4000 // 4 seconds to study the path
+  viewTime: 4000, // 4 seconds to study the path
+  selectionTime: 8000 // 8 seconds to select the path
+}
+
+// Helper function to hide the path preview
+const hidePathInGrid = (grid) => {
+  return grid.map(row => 
+    row.map(tile => ({
+      ...tile,
+      isPath: false // Hide the blue path preview
+    }))
+  )
 }
 
 // Game phases within playing state  
@@ -66,18 +77,22 @@ function App() {
   const [gamePhase, setGamePhase] = useState(GAME_PHASES.PATH_PREVIEW)
   const [grid, setGrid] = useState(createInitialGrid(LEVEL_1))
   const [timeLeft, setTimeLeft] = useState(LEVEL_1.viewTime / 1000)
+  const [selectionTimeLeft, setSelectionTimeLeft] = useState(LEVEL_1.selectionTime / 1000)
   const [score, setScore] = useState(0)
   const [userPath, setUserPath] = useState([]) // Track user's selected path
   const [creaturePosition, setCreaturePosition] = useState(LEVEL_1.start) // For animation
+  const [showSuccessEffect, setShowSuccessEffect] = useState(false) // For sparkly success animation
   
   const startGame = () => {
     setGameState(GAME_STATES.PLAYING)
     setGamePhase(GAME_PHASES.PATH_PREVIEW)
     setGrid(createInitialGrid(LEVEL_1))
     setTimeLeft(LEVEL_1.viewTime / 1000)
+    setSelectionTimeLeft(LEVEL_1.selectionTime / 1000)
     setScore(0)
     setUserPath([])
     setCreaturePosition(LEVEL_1.start)
+    setShowSuccessEffect(false)
   }
   
   const showInstructions = () => {
@@ -211,6 +226,12 @@ function App() {
     const percentage = isCorrect ? 100 : Math.round((userPath.length / (correctPath.length - 2)) * 50) // Partial credit
     setScore(percentage)
     
+    // Trigger success effect if perfect score
+    if (percentage === 100) {
+      setShowSuccessEffect(true)
+      setTimeout(() => setShowSuccessEffect(false), 3000) // Show for 3 seconds
+    }
+    
     // Start creature animation along user's path
     setGamePhase(GAME_PHASES.CREATURE_MOVING)
     animateCreature(fullUserPath, isCorrect)
@@ -245,22 +266,40 @@ function App() {
     }, 800) // Move every 800ms
   }
   
-  // Timer effect for path preview phase
+  // Timer effects for path preview and selection phases
   useEffect(() => {
-    if (gameState === GAME_STATES.PLAYING && gamePhase === GAME_PHASES.PATH_PREVIEW) {
-      const timer = setInterval(() => {
+    if (gameState !== GAME_STATES.PLAYING) return
+
+    let timer
+    
+    if (gamePhase === GAME_PHASES.PATH_PREVIEW) {
+      timer = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
             setGamePhase(GAME_PHASES.PATH_SELECTION)
+            setGrid(hidePathInGrid(grid)) // Hide the correct path
             return 0
           }
           return prev - 1
         })
       }, 1000)
-      
-      return () => clearInterval(timer)
     }
-  }, [gameState, gamePhase])
+    
+    else if (gamePhase === GAME_PHASES.PATH_SELECTION) {
+      timer = setInterval(() => {
+        setSelectionTimeLeft(prev => {
+          if (prev <= 1) {
+            // Time's up! Auto-submit the current path
+            checkPath()
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+
+    return () => clearInterval(timer)
+  }, [gameState, gamePhase, grid])
     if (gameState === GAME_STATES.INSTRUCTIONS) {
     return (
       <div className="min-h-screen relative overflow-hidden">
@@ -273,19 +312,23 @@ function App() {
             <div className="space-y-4 text-slate-700">
               <div className="flex items-start gap-3">
                 <span className="text-xl">👀</span>
-                <p><strong>Study the pattern:</strong> Watch carefully as creatures appear on the grid for a few seconds</p>
+                <p><strong>Study the path:</strong> Watch the blue path carefully - the turtle needs to reach the island!</p>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-xl">🧠</span>
-                <p><strong>Remember the layout:</strong> The grid will go blank - remember where each creature was!</p>
+                <p><strong>Remember the route:</strong> The path will disappear - remember every step!</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">⏰</span>
+                <p><strong>Beat the clock:</strong> You have limited time to recreate the path - work fast!</p>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-xl">🖱️</span>
-                <p><strong>Recreate the pattern:</strong> Click tiles to place creatures in the correct positions</p>
+                <p><strong>Draw the path:</strong> Click tiles to recreate the route from memory</p>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-xl">🏆</span>
-                <p><strong>Complete the level:</strong> Get all creatures home to unlock the next challenge!</p>
+                <span className="text-xl">🎉</span>
+                <p><strong>Perfect path = sparkles:</strong> Guide the turtle home for magical celebrations!</p>
               </div>
             </div>
             <button onClick={backToWelcome} className="w-full mt-6 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors">
@@ -303,6 +346,25 @@ function App() {
         <div className="absolute inset-0 bg-gradient-to-br from-violet-100 via-purple-50 to-indigo-100">
           <div className="absolute inset-0 bg-white/30"></div>
         </div>
+        
+        {/* Success Effect Overlay */}
+        {showSuccessEffect && (
+          <div className="absolute inset-0 z-20 pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-200/20 via-green-200/20 to-blue-200/20 animate-pulse"></div>
+            {/* Floating sparkles */}
+            <div className="absolute top-1/4 left-1/4 text-4xl animate-bounce" style={{animationDelay: '0s'}}>✨</div>
+            <div className="absolute top-1/3 right-1/4 text-3xl animate-bounce" style={{animationDelay: '0.2s'}}>🌟</div>
+            <div className="absolute bottom-1/3 left-1/3 text-4xl animate-bounce" style={{animationDelay: '0.4s'}}>💫</div>
+            <div className="absolute top-1/2 right-1/3 text-3xl animate-bounce" style={{animationDelay: '0.6s'}}>⭐</div>
+            <div className="absolute bottom-1/4 right-1/5 text-4xl animate-bounce" style={{animationDelay: '0.8s'}}>✨</div>
+            <div className="absolute top-1/5 left-1/2 text-3xl animate-bounce" style={{animationDelay: '1s'}}>🌟</div>
+            {/* Success text */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <div className="text-6xl font-bold text-yellow-500 animate-pulse">🎉 PERFECT! 🎉</div>
+            </div>
+          </div>
+        )}
+        
         <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
           <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-2xl w-full text-center">
             {/* Header */}
@@ -317,6 +379,7 @@ function App() {
               {gamePhase === GAME_PHASES.PATH_SELECTION && (
                 <div>
                   <p className="text-slate-600 mb-2">Click tiles to recreate the path from memory!</p>
+                  <div className="text-2xl font-bold text-orange-600 mb-2">⏰ {selectionTimeLeft}s</div>
                   <p className="text-sm text-slate-500">💡 Green tiles = your path. Click again to deselect.</p>
                 </div>
               )}
