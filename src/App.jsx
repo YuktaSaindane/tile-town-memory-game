@@ -1,23 +1,45 @@
 import React, { useState, useEffect } from 'react'
 
-// Add confetti animation styles
-const confettiStyles = `
-  @keyframes confetti-fall {
+// Elegant sparkle animation styles
+const sparkleStyles = `
+  @keyframes sparkle-rise {
     0% {
-      transform: translateY(-100vh) rotateZ(0deg);
+      transform: translateY(0) scale(0) rotate(0deg);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-20px) scale(1) rotate(180deg);
       opacity: 1;
     }
     100% {
-      transform: translateY(100vh) rotateZ(720deg);
+      transform: translateY(-40px) scale(0) rotate(360deg);
       opacity: 0;
     }
+  }
+  
+  @keyframes gentle-glow {
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    }
+  }
+  
+  .sparkle {
+    animation: sparkle-rise 1.5s ease-out infinite;
+    animation-delay: var(--delay);
+  }
+  
+  .success-glow {
+    animation: gentle-glow 1s ease-in-out infinite;
   }
 `
 
 // Inject styles into document head
 if (typeof document !== 'undefined') {
   const styleSheet = document.createElement('style')
-  styleSheet.textContent = confettiStyles
+  styleSheet.textContent = sparkleStyles
   document.head.appendChild(styleSheet)
 }
 
@@ -56,33 +78,52 @@ const LEVELS = {
     background: "from-violet-100 via-purple-50 to-indigo-100"
   },
   2: {
-    name: "Cat's Adventure",
+    name: "Cat's Nightmare Maze",
     creature: "🐱", 
     goal: "🐟",
-    gridSize: 5,
+    gridSize: 6,
     start: { x: 0, y: 0 },
-    end: { x: 4, y: 4 },
+    end: { x: 5, y: 5 },
     correctPath: [
       { x: 0, y: 0 }, // start
       { x: 1, y: 0 },
       { x: 2, y: 0 },
+      { x: 3, y: 0 },
+      { x: 4, y: 0 },
+      { x: 5, y: 0 },
+      { x: 5, y: 1 },
+      { x: 4, y: 1 },
+      { x: 3, y: 1 },
       { x: 2, y: 1 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+      { x: 0, y: 2 },
+      { x: 1, y: 2 },
       { x: 2, y: 2 },
       { x: 3, y: 2 },
       { x: 4, y: 2 },
+      { x: 5, y: 2 },
+      { x: 5, y: 3 },
       { x: 4, y: 3 },
-      { x: 4, y: 4 }  // end
+      { x: 3, y: 3 },
+      { x: 2, y: 3 },
+      { x: 1, y: 3 },
+      { x: 0, y: 3 },
+      { x: 0, y: 4 },
+      { x: 1, y: 4 },
+      { x: 2, y: 4 },
+      { x: 3, y: 4 },
+      { x: 4, y: 4 },
+      { x: 5, y: 4 },
+      { x: 5, y: 5 }  // end - insane zigzag snake pattern!
     ],
     obstacles: [
-      { x: 1, y: 1 },
-      { x: 1, y: 2 },
-      { x: 3, y: 1 },
-      { x: 3, y: 3 },
-      { x: 2, y: 4 }
+      // Strategic obstacles to force the zigzag path
+      { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }
     ],
-    viewTime: 5000, // 5 seconds to study (harder level)
-    selectionTime: 10000, // 10 seconds to select (more complex)
-    background: "from-orange-100 via-amber-50 to-yellow-100"
+    viewTime: 2000, // Only 2 seconds to memorize this nightmare!
+    selectionTime: 7000, // 7 seconds to recreate this complex path
+    background: "from-red-100 via-orange-50 to-yellow-100"
   }
 }
 
@@ -137,9 +178,9 @@ function App() {
   const [score, setScore] = useState(0)
   const [userPath, setUserPath] = useState([]) // Track user's selected path
   const [creaturePosition, setCreaturePosition] = useState(LEVELS[1].start) // For animation
-  const [showSuccessEffect, setShowSuccessEffect] = useState(false) // For sparkly success animation
   const [isDrawing, setIsDrawing] = useState(false) // Track if user is actively drawing
   const [drawMode, setDrawMode] = useState('add') // 'add' or 'remove' - what happens when dragging
+  const [showSparkles, setShowSparkles] = useState(false) // For elegant sparkle effects
   
   const currentLevelData = LEVELS[currentLevel]
   
@@ -154,9 +195,9 @@ function App() {
     setScore(0)
     setUserPath([])
     setCreaturePosition(level.start)
-    setShowSuccessEffect(false)
     setIsDrawing(false)
     setDrawMode('add')
+    setShowSparkles(false)
   }
   
   const showInstructions = () => {
@@ -371,10 +412,10 @@ function App() {
     const percentage = isCorrect ? 100 : Math.round((userPath.length / (correctPath.length - 2)) * 50) // Partial credit
     setScore(percentage)
     
-    // Trigger success effect if perfect score
+    // Trigger sparkles for perfect score
     if (percentage === 100) {
-      setShowSuccessEffect(true)
-      setTimeout(() => setShowSuccessEffect(false), 3000) // Show for 3 seconds
+      setShowSparkles(true)
+      setTimeout(() => setShowSparkles(false), 3000) // Show sparkles for 3 seconds
     }
     
     // Start creature animation along user's path
@@ -410,9 +451,8 @@ function App() {
           unlockNextLevel()
         }
         
-        setTimeout(() => {
-          setGamePhase(GAME_PHASES.RESULT)
-        }, 1000) // Wait 1 second before showing result
+        // Show results immediately
+        setGamePhase(GAME_PHASES.RESULT)
       }
     }, 800) // Move every 800ms
   }
@@ -590,64 +630,29 @@ function App() {
           <div className="absolute inset-0 bg-white/30"></div>
         </div>
         
-        {/* Confetti Celebration Effect */}
-        {showSuccessEffect && (
-          <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
-            {/* Massive Confetti Rain */}
-            <div className="absolute top-0 left-0 w-full">
-              {/* Row 1 - Left side */}
-              <div className="absolute top-0 left-[5%] w-3 h-3 bg-red-500" style={{animation: 'confetti-fall 2s linear infinite', animationDelay: '0s'}}></div>
-              <div className="absolute top-0 left-[8%] w-2 h-4 bg-blue-500 rounded" style={{animation: 'confetti-fall 2.2s linear infinite', animationDelay: '0.1s'}}></div>
-              <div className="absolute top-0 left-[12%] w-4 h-2 bg-yellow-500" style={{animation: 'confetti-fall 1.8s linear infinite', animationDelay: '0.2s'}}></div>
-              <div className="absolute top-0 left-[16%] w-3 h-3 bg-green-500 rounded-full" style={{animation: 'confetti-fall 2.1s linear infinite', animationDelay: '0.3s'}}></div>
-              <div className="absolute top-0 left-[20%] w-2 h-5 bg-purple-500" style={{animation: 'confetti-fall 1.9s linear infinite', animationDelay: '0.4s'}}></div>
-              <div className="absolute top-0 left-[24%] w-4 h-3 bg-pink-500 rounded" style={{animation: 'confetti-fall 2.3s linear infinite', animationDelay: '0.5s'}}></div>
-              <div className="absolute top-0 left-[28%] w-3 h-3 bg-orange-500 rounded-full" style={{animation: 'confetti-fall 2s linear infinite', animationDelay: '0.6s'}}></div>
-              <div className="absolute top-0 left-[32%] w-2 h-4 bg-cyan-500" style={{animation: 'confetti-fall 1.7s linear infinite', animationDelay: '0.7s'}}></div>
-              <div className="absolute top-0 left-[36%] w-4 h-2 bg-lime-500 rounded" style={{animation: 'confetti-fall 2.4s linear infinite', animationDelay: '0.8s'}}></div>
-              <div className="absolute top-0 left-[40%] w-3 h-3 bg-indigo-500" style={{animation: 'confetti-fall 2.2s linear infinite', animationDelay: '0.9s'}}></div>
-              
-              {/* Row 2 - Middle */}
-              <div className="absolute top-0 left-[44%] w-2 h-3 bg-rose-500 rounded-full" style={{animation: 'confetti-fall 1.8s linear infinite', animationDelay: '1s'}}></div>
-              <div className="absolute top-0 left-[48%] w-4 h-4 bg-emerald-500" style={{animation: 'confetti-fall 2.1s linear infinite', animationDelay: '1.1s'}}></div>
-              <div className="absolute top-0 left-[52%] w-3 h-2 bg-amber-500 rounded" style={{animation: 'confetti-fall 1.9s linear infinite', animationDelay: '1.2s'}}></div>
-              <div className="absolute top-0 left-[56%] w-2 h-2 bg-teal-500 rounded-full" style={{animation: 'confetti-fall 2.3s linear infinite', animationDelay: '1.3s'}}></div>
-              <div className="absolute top-0 left-[60%] w-3 h-4 bg-violet-500" style={{animation: 'confetti-fall 2s linear infinite', animationDelay: '1.4s'}}></div>
-              <div className="absolute top-0 left-[64%] w-4 h-3 bg-red-400 rounded" style={{animation: 'confetti-fall 1.8s linear infinite', animationDelay: '1.5s'}}></div>
-              <div className="absolute top-0 left-[68%] w-2 h-5 bg-blue-400" style={{animation: 'confetti-fall 2.2s linear infinite', animationDelay: '1.6s'}}></div>
-              <div className="absolute top-0 left-[72%] w-3 h-3 bg-green-400 rounded-full" style={{animation: 'confetti-fall 1.7s linear infinite', animationDelay: '1.7s'}}></div>
-              <div className="absolute top-0 left-[76%] w-4 h-2 bg-yellow-400 rounded" style={{animation: 'confetti-fall 2.4s linear infinite', animationDelay: '1.8s'}}></div>
-              <div className="absolute top-0 left-[80%] w-2 h-4 bg-purple-400" style={{animation: 'confetti-fall 1.9s linear infinite', animationDelay: '1.9s'}}></div>
-              
-              {/* Row 3 - Right side */}
-              <div className="absolute top-0 left-[84%] w-3 h-3 bg-pink-400 rounded-full" style={{animation: 'confetti-fall 2.1s linear infinite', animationDelay: '2s'}}></div>
-              <div className="absolute top-0 left-[88%] w-4 h-3 bg-orange-400 rounded" style={{animation: 'confetti-fall 1.8s linear infinite', animationDelay: '2.1s'}}></div>
-              <div className="absolute top-0 left-[92%] w-2 h-2 bg-cyan-400 rounded-full" style={{animation: 'confetti-fall 2.3s linear infinite', animationDelay: '2.2s'}}></div>
-              <div className="absolute top-0 left-[96%] w-3 h-4 bg-lime-400" style={{animation: 'confetti-fall 2s linear infinite', animationDelay: '2.3s'}}></div>
-              
-              {/* Additional scattered pieces */}
-              <div className="absolute top-0 left-[15%] w-2 h-3 bg-fuchsia-500 rounded" style={{animation: 'confetti-fall 1.6s linear infinite', animationDelay: '0.5s'}}></div>
-              <div className="absolute top-0 left-[35%] w-3 h-2 bg-sky-500" style={{animation: 'confetti-fall 2.5s linear infinite', animationDelay: '1.2s'}}></div>
-              <div className="absolute top-0 left-[55%] w-4 h-4 bg-red-600 rounded-full" style={{animation: 'confetti-fall 1.9s linear infinite', animationDelay: '0.8s'}}></div>
-              <div className="absolute top-0 left-[75%] w-2 h-5 bg-emerald-600" style={{animation: 'confetti-fall 2.1s linear infinite', animationDelay: '1.6s'}}></div>
-              <div className="absolute top-0 left-[25%] w-3 h-3 bg-violet-600 rounded" style={{animation: 'confetti-fall 1.7s linear infinite', animationDelay: '0.3s'}}></div>
-              <div className="absolute top-0 left-[45%] w-4 h-2 bg-amber-600 rounded-full" style={{animation: 'confetti-fall 2.4s linear infinite', animationDelay: '1.9s'}}></div>
-              <div className="absolute top-0 left-[65%] w-2 h-4 bg-rose-600" style={{animation: 'confetti-fall 1.8s linear infinite', animationDelay: '0.7s'}}></div>
-              <div className="absolute top-0 left-[85%] w-3 h-3 bg-teal-600 rounded" style={{animation: 'confetti-fall 2.2s linear infinite', animationDelay: '1.4s'}}></div>
-            </div>
-            
-            {/* Celebration Emojis Popping */}
-            <div className="absolute top-1/2 left-1/5 text-3xl animate-bounce" style={{animationDelay: '0s'}}>🎉</div>
-            <div className="absolute top-2/3 right-1/5 text-3xl animate-bounce" style={{animationDelay: '0.3s'}}>🥳</div>
-            <div className="absolute top-1/3 left-1/2 text-3xl animate-bounce" style={{animationDelay: '0.6s'}}>🎊</div>
-            <div className="absolute bottom-1/4 left-3/4 text-3xl animate-bounce" style={{animationDelay: '0.9s'}}>🌟</div>
-            <div className="absolute top-1/4 right-1/3 text-3xl animate-bounce" style={{animationDelay: '0.4s'}}>🎉</div>
-            <div className="absolute bottom-1/3 left-1/4 text-3xl animate-bounce" style={{animationDelay: '0.7s'}}>🎊</div>
+        {/* Elegant Sparkles Overlay */}
+        {showSparkles && (
+          <div className="absolute inset-0 pointer-events-none z-20">
+            {Array.from({ length: 15 }).map((_, i) => (
+              <div
+                key={i}
+                className="sparkle absolute text-2xl"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  '--delay': `${Math.random() * 2}s`,
+                  color: '#FFD700',
+                  fontSize: `${Math.random() * 20 + 15}px`
+                }}
+              >
+                ✨
+              </div>
+            ))}
           </div>
         )}
         
         <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
-          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-2xl w-full text-center">
+          <div className={`bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-2xl w-full text-center ${showSparkles ? 'success-glow' : ''}`}>
             {/* Header */}
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-slate-800 mb-2">{currentLevelData.creature} {currentLevelData.name}</h2>
