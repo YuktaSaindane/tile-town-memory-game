@@ -133,6 +133,65 @@ const LEVELS = {
     viewTime: 2000, // Only 2 seconds to memorize this nightmare!
     selectionTime: 7000, // 7 seconds to recreate this complex path
     background: "from-red-100 via-orange-50 to-yellow-100"
+  },
+  3: {
+    name: "Dragon's Spiral Tower",
+    creature: "🐉", 
+    goal: "💎",
+    gridSize: 7,
+    start: { x: 3, y: 6 },
+    end: { x: 3, y: 0 },
+    correctPath: [
+      { x: 3, y: 6 }, // start (bottom center)
+      { x: 2, y: 6 }, { x: 1, y: 6 }, { x: 0, y: 6 }, // go left
+      { x: 0, y: 5 }, { x: 0, y: 4 }, { x: 0, y: 3 }, // go up
+      { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 }, // go right
+      { x: 6, y: 2 }, { x: 6, y: 1 }, // go up
+      { x: 5, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 1 }, // go left
+      { x: 2, y: 0 }, { x: 3, y: 0 } // go up to treasure
+    ],
+    obstacles: [
+      // Create spiral tower obstacles
+      { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 },
+      { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 5 },
+      { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 6, y: 4 },
+      { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 },
+      { x: 1, y: 1 }, { x: 0, y: 1 }, { x: 6, y: 1 }
+    ],
+    viewTime: 2500, // 2.5 seconds to study the spiral
+    selectionTime: 8000, // 8 seconds for this complex spiral
+    background: "from-purple-100 via-pink-50 to-red-100"
+  },
+  4: {
+    name: "Rabbit's Garden Maze",
+    creature: "🐰", 
+    goal: "🥕",
+    gridSize: 8,
+    start: { x: 0, y: 0 },
+    end: { x: 7, y: 7 },
+    correctPath: [
+      { x: 0, y: 0 }, // start
+      { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 }, // down left edge
+      { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 7, y: 4 }, // across middle
+      { x: 7, y: 3 }, { x: 7, y: 2 }, { x: 7, y: 1 }, { x: 7, y: 0 }, // up right edge 
+      { x: 6, y: 0 }, { x: 5, y: 0 }, { x: 4, y: 0 }, { x: 3, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 0 }, // back across top
+      { x: 1, y: 1 }, { x: 1, y: 2 }, { x: 1, y: 3 }, // down
+      { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 }, // right
+      { x: 6, y: 5 }, { x: 6, y: 6 }, { x: 6, y: 7 }, // down
+      { x: 7, y: 7 } // final step to carrot!
+    ],
+    obstacles: [
+      // Strategic maze blocking
+      { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 },
+      { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 },
+      { x: 0, y: 7 }, { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 3, y: 7 }, { x: 4, y: 7 }, { x: 5, y: 7 },
+      { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 },
+      { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 6, y: 2 },
+      { x: 0, y: 5 }, { x: 7, y: 5 }, { x: 7, y: 6 }
+    ],
+    viewTime: 1500, // Only 1.5 seconds! Brutal!
+    selectionTime: 10000, // 10 seconds for this massive maze
+    background: "from-green-100 via-emerald-50 to-teal-100"
   }
 }
 
