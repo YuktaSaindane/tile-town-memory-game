@@ -25,32 +25,65 @@ if (typeof document !== 'undefined') {
 const GAME_STATES = {
   WELCOME: 'welcome',
   PLAYING: 'playing',
-  INSTRUCTIONS: 'instructions'
+  INSTRUCTIONS: 'instructions',
+  LEVEL_SELECT: 'level_select'
 }
 
-// Level 1: Turtle's Journey configuration
-const LEVEL_1 = {
-  name: "Turtle's Journey", 
-  creature: "🐢",
-  goal: "🏝️",
-  gridSize: 4,
-  start: { x: 0, y: 0 },
-  end: { x: 3, y: 3 },
-  correctPath: [
-    { x: 0, y: 0 }, // start
-    { x: 0, y: 1 },
-    { x: 0, y: 2 },
-    { x: 1, y: 2 },
-    { x: 2, y: 2 },
-    { x: 2, y: 3 },
-    { x: 3, y: 3 }  // end
-  ],
-  obstacles: [
-    { x: 1, y: 1 },
-    { x: 2, y: 1 }
-  ],
-  viewTime: 4000, // 4 seconds to study the path
-  selectionTime: 8000 // 8 seconds to select the path
+// Level configurations
+const LEVELS = {
+  1: {
+    name: "Turtle's Journey", 
+    creature: "🐢",
+    goal: "🏝️",
+    gridSize: 4,
+    start: { x: 0, y: 0 },
+    end: { x: 3, y: 3 },
+    correctPath: [
+      { x: 0, y: 0 }, // start
+      { x: 0, y: 1 },
+      { x: 0, y: 2 },
+      { x: 1, y: 2 },
+      { x: 2, y: 2 },
+      { x: 2, y: 3 },
+      { x: 3, y: 3 }  // end
+    ],
+    obstacles: [
+      { x: 1, y: 1 },
+      { x: 2, y: 1 }
+    ],
+    viewTime: 4000, // 4 seconds to study the path
+    selectionTime: 8000, // 8 seconds to select the path
+    background: "from-violet-100 via-purple-50 to-indigo-100"
+  },
+  2: {
+    name: "Cat's Adventure",
+    creature: "🐱", 
+    goal: "🐟",
+    gridSize: 5,
+    start: { x: 0, y: 0 },
+    end: { x: 4, y: 4 },
+    correctPath: [
+      { x: 0, y: 0 }, // start
+      { x: 1, y: 0 },
+      { x: 2, y: 0 },
+      { x: 2, y: 1 },
+      { x: 2, y: 2 },
+      { x: 3, y: 2 },
+      { x: 4, y: 2 },
+      { x: 4, y: 3 },
+      { x: 4, y: 4 }  // end
+    ],
+    obstacles: [
+      { x: 1, y: 1 },
+      { x: 1, y: 2 },
+      { x: 3, y: 1 },
+      { x: 3, y: 3 },
+      { x: 2, y: 4 }
+    ],
+    viewTime: 5000, // 5 seconds to study (harder level)
+    selectionTime: 10000, // 10 seconds to select (more complex)
+    background: "from-orange-100 via-amber-50 to-yellow-100"
+  }
 }
 
 // Helper function to hide the path preview
@@ -96,25 +129,31 @@ const createInitialGrid = (level) => {
 function App() {
   const [gameState, setGameState] = useState(GAME_STATES.WELCOME)
   const [gamePhase, setGamePhase] = useState(GAME_PHASES.PATH_PREVIEW)
-  const [grid, setGrid] = useState(createInitialGrid(LEVEL_1))
-  const [timeLeft, setTimeLeft] = useState(LEVEL_1.viewTime / 1000)
-  const [selectionTimeLeft, setSelectionTimeLeft] = useState(LEVEL_1.selectionTime / 1000)
+  const [currentLevel, setCurrentLevel] = useState(1)
+  const [unlockedLevels, setUnlockedLevels] = useState([1]) // Only level 1 unlocked initially
+  const [grid, setGrid] = useState(createInitialGrid(LEVELS[1]))
+  const [timeLeft, setTimeLeft] = useState(LEVELS[1].viewTime / 1000)
+  const [selectionTimeLeft, setSelectionTimeLeft] = useState(LEVELS[1].selectionTime / 1000)
   const [score, setScore] = useState(0)
   const [userPath, setUserPath] = useState([]) // Track user's selected path
-  const [creaturePosition, setCreaturePosition] = useState(LEVEL_1.start) // For animation
+  const [creaturePosition, setCreaturePosition] = useState(LEVELS[1].start) // For animation
   const [showSuccessEffect, setShowSuccessEffect] = useState(false) // For sparkly success animation
   const [isDrawing, setIsDrawing] = useState(false) // Track if user is actively drawing
   const [drawMode, setDrawMode] = useState('add') // 'add' or 'remove' - what happens when dragging
   
-  const startGame = () => {
+  const currentLevelData = LEVELS[currentLevel]
+  
+  const startGame = (levelNumber = currentLevel) => {
+    const level = LEVELS[levelNumber]
+    setCurrentLevel(levelNumber)
     setGameState(GAME_STATES.PLAYING)
     setGamePhase(GAME_PHASES.PATH_PREVIEW)
-    setGrid(createInitialGrid(LEVEL_1))
-    setTimeLeft(LEVEL_1.viewTime / 1000)
-    setSelectionTimeLeft(LEVEL_1.selectionTime / 1000)
+    setGrid(createInitialGrid(level))
+    setTimeLeft(level.viewTime / 1000)
+    setSelectionTimeLeft(level.selectionTime / 1000)
     setScore(0)
     setUserPath([])
-    setCreaturePosition(LEVEL_1.start)
+    setCreaturePosition(level.start)
     setShowSuccessEffect(false)
     setIsDrawing(false)
     setDrawMode('add')
@@ -126,6 +165,17 @@ function App() {
   
   const backToWelcome = () => {
     setGameState(GAME_STATES.WELCOME)
+  }
+  
+  const showLevelSelect = () => {
+    setGameState(GAME_STATES.LEVEL_SELECT)
+  }
+  
+  const unlockNextLevel = () => {
+    const nextLevel = currentLevel + 1
+    if (LEVELS[nextLevel] && !unlockedLevels.includes(nextLevel)) {
+      setUnlockedLevels([...unlockedLevels, nextLevel])
+    }
   }
   
   // Tile component - handles different tile states
@@ -140,11 +190,11 @@ function App() {
     
     // Start and goal always visible
     if (tile.isStart) {
-      content = tile.isCreatureHere ? LEVEL_1.creature : "🏁"
+      content = tile.isCreatureHere ? LEVELS[currentLevel].creature : "🏁"
       bgColor = "bg-green-100"
       borderColor = "border-green-400"
     } else if (tile.isGoal) {
-      content = LEVEL_1.goal
+      content = LEVELS[currentLevel].goal
       bgColor = "bg-blue-100" 
       borderColor = "border-blue-400"
     } else if (tile.isObstacle) {
@@ -203,7 +253,8 @@ function App() {
   
   // Grid component
   const Grid = ({ grid, onTileClick, onTileMouseDown, onTileMouseEnter, onTileMouseUp, gamePhase }) => (
-    <div className="grid grid-cols-4 gap-2 p-4 bg-slate-200 rounded-xl select-none">
+    <div className={`grid gap-2 p-4 bg-slate-200 rounded-xl select-none`} 
+         style={{gridTemplateColumns: `repeat(${currentLevelData.gridSize}, minmax(0, 1fr))`}}>
       {grid.map((row, rowIndex) =>
         row.map((tile, colIndex) => (
           <Tile
@@ -302,8 +353,8 @@ function App() {
   // Check if user's path matches the correct path
   const checkPath = () => {
     // Add start and end to user path for comparison
-    const fullUserPath = [LEVEL_1.start, ...userPath, LEVEL_1.end]
-    const correctPath = LEVEL_1.correctPath
+    const fullUserPath = [LEVELS[currentLevel].start, ...userPath, LEVELS[currentLevel].end]
+    const correctPath = LEVELS[currentLevel].correctPath
     
     // Check if paths match exactly (same length and same coordinates)
     let isCorrect = fullUserPath.length === correctPath.length
@@ -353,6 +404,12 @@ function App() {
       } else {
         // Animation complete
         clearInterval(animationInterval)
+        
+        // Unlock next level if this level was completed perfectly
+        if (isCorrect) {
+          unlockNextLevel()
+        }
+        
         setTimeout(() => {
           setGamePhase(GAME_PHASES.RESULT)
         }, 1000) // Wait 1 second before showing result
@@ -411,7 +468,82 @@ function App() {
       document.removeEventListener('touchend', handleGlobalMouseUp)
     }
   }, [isDrawing])
-    if (gameState === GAME_STATES.INSTRUCTIONS) {
+  
+  // Level Selection Screen
+  if (gameState === GAME_STATES.LEVEL_SELECT) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
+          <div className="absolute inset-0 bg-white/30"></div>
+        </div>
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-2xl w-full">
+            <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">🌟 Choose Your Adventure 🌟</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {Object.entries(LEVELS).map(([levelNum, level]) => {
+                const isUnlocked = unlockedLevels.includes(parseInt(levelNum))
+                const isCompleted = unlockedLevels.includes(parseInt(levelNum) + 1) // Next level unlocked means this one is completed
+                
+                return (
+                  <div
+                    key={levelNum}
+                    className={`relative p-6 rounded-xl border-2 transition-all duration-200 ${
+                      isUnlocked
+                        ? 'bg-white/80 border-blue-300 hover:bg-white/90 hover:shadow-lg cursor-pointer'
+                        : 'bg-gray-100/50 border-gray-300 cursor-not-allowed opacity-60'
+                    }`}
+                    onClick={() => isUnlocked && startGame(parseInt(levelNum))}
+                  >
+                    {/* Level Status Badge */}
+                    <div className="absolute -top-2 -right-2">
+                      {isCompleted && (
+                        <div className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                          ✓
+                        </div>
+                      )}
+                      {!isUnlocked && (
+                        <div className="bg-gray-400 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm">
+                          🔒
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Level Info */}
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">{level.creature}</div>
+                      <h3 className="text-xl font-bold text-slate-800 mb-2">Level {levelNum}</h3>
+                      <p className="text-lg text-slate-600 mb-3">{level.name}</p>
+                      <div className="text-sm text-slate-500 space-y-1">
+                        <p>📐 Grid: {level.gridSize}×{level.gridSize}</p>
+                        <p>⏱️ Study: {level.viewTime/1000}s | Select: {level.selectionTime/1000}s</p>
+                        <p>🎯 Goal: Get {level.creature} to {level.goal}</p>
+                      </div>
+                      
+                      {!isUnlocked && (
+                        <p className="text-sm text-orange-600 mt-3 font-medium">
+                          Complete previous level to unlock!
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            
+            <button 
+              onClick={backToWelcome}
+              className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-3 px-6 rounded-xl transition-colors"
+            >
+              ← Back to Main Menu
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (gameState === GAME_STATES.INSTRUCTIONS) {
     return (
       <div className="min-h-screen relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-violet-100 via-purple-50 to-indigo-100">
@@ -454,7 +586,7 @@ function App() {
   if (gameState === GAME_STATES.PLAYING) {
     return (
       <div className="min-h-screen relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-100 via-purple-50 to-indigo-100">
+        <div className={`absolute inset-0 bg-gradient-to-br ${currentLevelData.background}`}>
           <div className="absolute inset-0 bg-white/30"></div>
         </div>
         
@@ -518,10 +650,11 @@ function App() {
           <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-2xl w-full text-center">
             {/* Header */}
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">🐢 {LEVEL_1.name}</h2>
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">{currentLevelData.creature} {currentLevelData.name}</h2>
+              <p className="text-sm text-slate-500">Level {currentLevel}</p>
               {gamePhase === GAME_PHASES.PATH_PREVIEW && (
                 <div>
-                  <p className="text-slate-600 mb-2">Study the blue path carefully! The turtle needs to reach the island.</p>
+                  <p className="text-slate-600 mb-2">Study the blue path carefully! The {currentLevelData.creature} needs to reach the {currentLevelData.goal}.</p>
                   <div className="text-3xl font-bold text-blue-600">{timeLeft}s</div>
                 </div>
               )}
@@ -534,7 +667,7 @@ function App() {
               )}
               {gamePhase === GAME_PHASES.CREATURE_MOVING && (
                 <div>
-                  <p className="text-slate-600 mb-2">🐢 The turtle is following your path...</p>
+                  <p className="text-slate-600 mb-2">{currentLevelData.creature} The {currentLevelData.creature.includes('🐢') ? 'turtle' : 'cat'} is following your path...</p>
                   <div className="text-lg text-blue-600">Watch carefully!</div>
                 </div>
               )}
@@ -543,9 +676,9 @@ function App() {
                   <p className="text-slate-600 mb-2">{score === 100 ? "Perfect! 🎉" : "Good try! 👍"}</p>
                   <div className="text-2xl font-bold text-green-600">{score}% correct!</div>
                   {score === 100 ? (
-                    <p className="text-sm text-green-600 mt-1">The turtle made it home! 🏝️</p>
+                    <p className="text-sm text-green-600 mt-1">The {currentLevelData.creature.includes('🐢') ? 'turtle' : 'cat'} made it home! {currentLevelData.goal}</p>
                   ) : (
-                    <p className="text-sm text-orange-600 mt-1">The turtle got confused... Try again! 🤔</p>
+                    <p className="text-sm text-orange-600 mt-1">The {currentLevelData.creature.includes('🐢') ? 'turtle' : 'cat'} got confused... Try again! 🤔</p>
                   )}
                 </div>
               )}
@@ -572,11 +705,11 @@ function App() {
                     <span className="text-sm text-slate-600">Correct Path</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">🐢</span>
-                    <span className="text-sm text-slate-600">Turtle</span>
+                    <span className="text-lg">{currentLevelData.creature}</span>
+                    <span className="text-sm text-slate-600">{currentLevelData.creature.includes('🐢') ? 'Turtle' : 'Cat'}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">🏝️</span>
+                    <span className="text-lg">{currentLevelData.goal}</span>
                     <span className="text-sm text-slate-600">Goal</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -610,7 +743,7 @@ function App() {
                     disabled={userPath.length === 0}
                     className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-colors"
                   >
-                    🐢 Send Turtle!
+                    {currentLevelData.creature} Send {currentLevelData.creature.includes('🐢') ? 'Turtle' : 'Cat'}!
                   </button>
                   <button 
                     onClick={() => {
@@ -628,12 +761,30 @@ function App() {
               )}
               
               {gamePhase === GAME_PHASES.RESULT && (
-                <button 
-                  onClick={startGame}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
-                >
-                  🎮 Try Again
-                </button>
+                <div className="space-y-2">
+                  <button 
+                    onClick={() => startGame(currentLevel)}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+                  >
+                    🎮 Try Again
+                  </button>
+                  
+                  {score === 100 && unlockedLevels.includes(currentLevel + 1) && LEVELS[currentLevel + 1] && (
+                    <button 
+                      onClick={() => startGame(currentLevel + 1)}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+                    >
+                      🌟 Next Level: {LEVELS[currentLevel + 1].name}
+                    </button>
+                  )}
+                  
+                  <button 
+                    onClick={showLevelSelect}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  >
+                    🌟 Level Select
+                  </button>
+                </div>
               )}
               
               {gamePhase !== GAME_PHASES.CREATURE_MOVING && (
@@ -682,27 +833,37 @@ function App() {
 
           {/* Action Buttons */}
           <div className="space-y-3 mb-6">
-            <button onClick={startGame} className="group w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold text-lg py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/25 transform hover:-translate-y-1 active:translate-y-0 active:shadow-lg">
+            <button onClick={() => startGame(currentLevel)} className="group w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold text-lg py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/25 transform hover:-translate-y-1 active:translate-y-0 active:shadow-lg">
               <span className="flex items-center justify-center gap-2">
                 <span className="group-hover:scale-110 transition-transform">🎮</span>
-                Start Playing
+                Continue Level {currentLevel}
               </span>
             </button>
             
-            <button onClick={showInstructions} className="w-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white font-medium py-3 px-8 rounded-xl transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5">
+            <button onClick={showLevelSelect} className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium py-3 px-8 rounded-xl transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5">
+              <span className="flex items-center justify-center gap-2">
+                <span>🌟</span>
+                Select Level
+              </span>
+            </button>
+            
+            <button onClick={showInstructions} className="w-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-slate-700 font-medium py-3 px-8 rounded-xl transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5">
               How to Play
             </button>
           </div>
 
-                      {/* Level Indicator */}
-            <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <span className="text-lg">🐢</span>
-                <span className="font-semibold text-slate-800">Level 1: {LEVEL_1.name}</span>
-              </div>
-              <div className="text-sm text-slate-600">4×4 Grid • Path Memory Challenge</div>
-              <div className="text-xs text-blue-600 mt-1">Help the turtle find its way home! 🏝️</div>
+          {/* Level Indicator */}
+          <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <span className="text-lg">{currentLevelData.creature}</span>
+              <span className="font-semibold text-slate-800">Level {currentLevel}: {currentLevelData.name}</span>
             </div>
+            <div className="text-sm text-slate-600">{currentLevelData.gridSize}×{currentLevelData.gridSize} Grid • Path Memory Challenge</div>
+            <div className="text-xs text-blue-600 mt-1">Help the {currentLevelData.creature} find {currentLevelData.goal}! </div>
+            <div className="text-xs text-slate-500 mt-2">
+              {unlockedLevels.length > 1 && `🎉 ${unlockedLevels.length} levels unlocked!`}
+            </div>
+          </div>
         </div>
       </div>
     </div>
