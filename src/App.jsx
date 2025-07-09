@@ -54,27 +54,36 @@ const GAME_STATES = {
 // Level configurations
 const LEVELS = {
   1: {
-    name: "Turtle's Journey", 
+    name: "Turtle's Maze Challenge", 
     creature: "🐢",
     goal: "🏝️",
-    gridSize: 4,
+    gridSize: 5,
     start: { x: 0, y: 0 },
-    end: { x: 3, y: 3 },
+    end: { x: 4, y: 4 },
     correctPath: [
       { x: 0, y: 0 }, // start
-      { x: 0, y: 1 },
-      { x: 0, y: 2 },
-      { x: 1, y: 2 },
+      { x: 1, y: 0 },
+      { x: 2, y: 0 },
+      { x: 3, y: 0 },
+      { x: 3, y: 1 },
+      { x: 3, y: 2 },
       { x: 2, y: 2 },
+      { x: 1, y: 2 },
+      { x: 0, y: 2 },
+      { x: 0, y: 3 },
+      { x: 1, y: 3 },
       { x: 2, y: 3 },
-      { x: 3, y: 3 }  // end
+      { x: 3, y: 3 },
+      { x: 4, y: 3 },
+      { x: 4, y: 4 }  // end - complex zigzag path!
     ],
     obstacles: [
-      { x: 1, y: 1 },
-      { x: 2, y: 1 }
+      { x: 4, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 },
+      { x: 4, y: 1 }, { x: 4, y: 2 }, { x: 3, y: 4 }, { x: 2, y: 4 },
+      { x: 1, y: 4 }, { x: 0, y: 4 }
     ],
-    viewTime: 4000, // 4 seconds to study the path
-    selectionTime: 8000, // 8 seconds to select the path
+    viewTime: 3000, // Only 3 seconds to study!
+    selectionTime: 6000, // 6 seconds to recreate
     background: "from-violet-100 via-purple-50 to-indigo-100"
   },
   2: {
@@ -238,10 +247,16 @@ function App() {
       content = LEVELS[currentLevel].goal
       bgColor = "bg-blue-100" 
       borderColor = "border-blue-400"
-    } else if (tile.isObstacle) {
+    } else if (tile.isObstacle && gamePhase !== GAME_PHASES.PATH_SELECTION) {
+      // Hide obstacles during path selection to create confusion!
       content = "🪨"
       bgColor = "bg-gray-300"
       borderColor = "border-gray-500"
+    } else if (tile.isHiddenObstacleHit) {
+      // Flash red when player hits a hidden obstacle
+      content = "❌"
+      bgColor = "bg-red-400"
+      borderColor = "border-red-600"
     } else if (gamePhase === GAME_PHASES.PATH_PREVIEW && tile.isPath && !tile.isStart && !tile.isGoal) {
       // Show correct path during preview
       bgColor = "bg-blue-400"
@@ -253,7 +268,7 @@ function App() {
       borderColor = "border-green-600"  
       content = "🟩"
     } else {
-      // Empty tile
+      // Empty tile (or hidden obstacle!)
       content = ""
       bgColor = "bg-slate-50"
     }
@@ -320,7 +335,19 @@ function App() {
     const tile = newGrid[y][x]
     
     // Don't allow clicking on start, goal, or obstacles
-    if (tile.isStart || tile.isGoal || tile.isObstacle) return
+    if (tile.isStart || tile.isGoal || tile.isObstacle) {
+      // Give subtle feedback for hidden obstacles
+      if (tile.isObstacle) {
+        // Flash red briefly to show they hit a hidden obstacle
+        tile.isHiddenObstacleHit = true
+        setGrid([...newGrid])
+        setTimeout(() => {
+          tile.isHiddenObstacleHit = false
+          setGrid([...newGrid])
+        }, 300)
+      }
+      return
+    }
     
     // Toggle tile selection
     tile.isSelectedByUser = !tile.isSelectedByUser
@@ -599,7 +626,11 @@ function App() {
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-xl">🧠</span>
-                <p><strong>Remember the route:</strong> The path will disappear - remember every step!</p>
+                <p><strong>Remember everything:</strong> Memorize both the path AND obstacle locations!</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">🫥</span>
+                <p><strong>Hidden obstacles:</strong> Obstacles disappear during your turn - avoid clicking them!</p>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-xl">⏰</span>
@@ -665,9 +696,9 @@ function App() {
               )}
               {gamePhase === GAME_PHASES.PATH_SELECTION && (
                 <div>
-                  <p className="text-slate-600 mb-2">Draw the path from memory! Click or drag across tiles.</p>
+                  <p className="text-slate-600 mb-2">Draw the path from memory! Obstacles are now hidden - avoid them!</p>
                   <div className="text-2xl font-bold text-orange-600 mb-2">⏰ {selectionTimeLeft}s</div>
-                  <p className="text-sm text-slate-500">💡 Green tiles = your path. Drag to add/remove smoothly!</p>
+                  <p className="text-sm text-slate-500">💡 Green tiles = your path. Red flash = hidden obstacle hit!</p>
                 </div>
               )}
               {gamePhase === GAME_PHASES.CREATURE_MOVING && (
@@ -734,6 +765,9 @@ function App() {
                   </div>
                   <div className="text-sm text-slate-600">
                     Selected: {userPath.length} tiles
+                  </div>
+                  <div className="text-xs text-red-600 font-medium">
+                    ⚠️ Obstacles are now hidden!
                   </div>
                 </div>
               </div>
