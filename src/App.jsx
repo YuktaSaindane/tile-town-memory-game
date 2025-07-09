@@ -227,7 +227,9 @@ const createInitialGrid = (level) => {
         isPath: level.correctPath.some(p => p.x === x && p.y === y),
         isSelectedByUser: false,
         isObstacle: level.obstacles.some(o => o.x === x && o.y === y),
-        isCreatureHere: x === level.start.x && y === level.start.y // creature starts here
+        isCreatureHere: x === level.start.x && y === level.start.y, // creature starts here
+        isTrail: false, // New trail effect
+        trailAge: 0 // New trail effect
       })
     }
     grid.push(row)
@@ -249,6 +251,7 @@ function App() {
   const [isDrawing, setIsDrawing] = useState(false) // Track if user is actively drawing
   const [drawMode, setDrawMode] = useState('add') // 'add' or 'remove' - what happens when dragging
   const [showSparkles, setShowSparkles] = useState(false) // For elegant sparkle effects
+  const [animationProgress, setAnimationProgress] = useState(0) // Track creature animation progress
   
   const currentLevelData = LEVELS[currentLevel]
   
@@ -266,6 +269,7 @@ function App() {
     setIsDrawing(false)
     setDrawMode('add')
     setShowSparkles(false)
+    setAnimationProgress(0)
   }
   
   const showInstructions = () => {
@@ -326,6 +330,10 @@ function App() {
       bgColor = "bg-green-400"
       borderColor = "border-green-600"  
       content = "🟩"
+    } else if (tile.isTrail) { // New trail effect
+      bgColor = "bg-blue-200" // Light blue for trail
+      borderColor = "border-blue-300"
+      content = "✨" // Sparkle for trail instead of blue square
     } else {
       // Empty tile (or hidden obstacle!)
       content = ""
@@ -512,25 +520,59 @@ function App() {
   // Animate creature moving along the path
   const animateCreature = (path, isCorrect) => {
     let stepIndex = 0
+    const totalSteps = path.length
+    
     const animationInterval = setInterval(() => {
       if (stepIndex < path.length) {
+        // Update progress
+        setAnimationProgress(Math.round((stepIndex / totalSteps) * 100))
+        
         // Update creature position
         setCreaturePosition(path[stepIndex])
         
-        // Update grid to show creature position
+        // Update grid to show creature position with trail
         const newGrid = [...grid]
-        // Clear creature from all tiles
-        newGrid.forEach(row => row.forEach(tile => tile.isCreatureHere = false))
+        // Clear creature from all tiles but keep trail
+        newGrid.forEach(row => row.forEach(tile => {
+          tile.isCreatureHere = false
+          // Remove old trail markers older than 3 steps
+          if (tile.trailAge > 3) {
+            tile.isTrail = false
+            tile.trailAge = 0
+          } else if (tile.isTrail) {
+            tile.trailAge = (tile.trailAge || 0) + 1
+          }
+        }))
+        
         // Set creature at current position
         if (path[stepIndex]) {
-          newGrid[path[stepIndex].y][path[stepIndex].x].isCreatureHere = true
+          const currentTile = newGrid[path[stepIndex].y][path[stepIndex].x]
+          currentTile.isCreatureHere = true
+          
+          // Add trail for previous position
+          if (stepIndex > 0 && path[stepIndex - 1]) {
+            const prevTile = newGrid[path[stepIndex - 1].y][path[stepIndex - 1].x]
+            if (!prevTile.isStart && !prevTile.isGoal) {
+              prevTile.isTrail = true
+              prevTile.trailAge = 1
+            }
+          }
         }
-        setGrid(newGrid)
         
+        setGrid(newGrid)
         stepIndex++
       } else {
         // Animation complete
         clearInterval(animationInterval)
+        setAnimationProgress(100)
+        
+        // Clear all trail effects
+        const finalGrid = [...grid]
+        finalGrid.forEach(row => row.forEach(tile => {
+          tile.isTrail = false
+          tile.trailAge = 0
+        }))
+        setGrid(finalGrid)
         
         // Unlock next level if this level was completed perfectly
         if (isCorrect) {
@@ -540,7 +582,7 @@ function App() {
         // Show results immediately
         setGamePhase(GAME_PHASES.RESULT)
       }
-    }, 800) // Move every 800ms
+    }, 200) // Much faster! Move every 200ms instead of 800ms
   }
   
   // Timer effects for path preview and selection phases
@@ -762,8 +804,15 @@ function App() {
               )}
               {gamePhase === GAME_PHASES.CREATURE_MOVING && (
                 <div>
-                  <p className="text-slate-600 mb-2">{currentLevelData.creature} The {currentLevelData.creature.includes('🐢') ? 'turtle' : 'cat'} is following your path...</p>
-                  <div className="text-lg text-blue-600">Watch carefully!</div>
+                  <p className="text-slate-600 mb-2">{currentLevelData.creature} The {currentLevelData.creature.includes('🐢') ? 'turtle' : currentLevelData.creature.includes('🐱') ? 'cat' : currentLevelData.creature.includes('🐉') ? 'dragon' : 'rabbit'} is following your path...</p>
+                  <div className="text-lg text-blue-600 mb-2">Watch carefully!</div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                    <div 
+                      className="bg-blue-600 h-3 rounded-full transition-all duration-200" 
+                      style={{width: `${animationProgress}%`}}
+                    ></div>
+                  </div>
+                  <div className="text-sm text-slate-500">{animationProgress}% complete</div>
                 </div>
               )}
               {gamePhase === GAME_PHASES.RESULT && (
