@@ -253,7 +253,68 @@ function App() {
   const [showSparkles, setShowSparkles] = useState(false) // For elegant sparkle effects
   const [animationProgress, setAnimationProgress] = useState(0) // Track creature animation progress
   
+  // Advanced Scoring System
+  const [detailedScore, setDetailedScore] = useState({
+    baseScore: 0,
+    speedBonus: 0,
+    perfectBonus: 0,
+    comboMultiplier: 1,
+    totalScore: 0
+  })
+  const [perfectStreak, setPerfectStreak] = useState(0)
+  const [levelStartTime, setLevelStartTime] = useState(null)
+  const [highScores, setHighScores] = useState(() => {
+    const saved = localStorage.getItem('tileTownHighScores')
+    return saved ? JSON.parse(saved) : {}
+  })
+  const [totalGameScore, setTotalGameScore] = useState(() => {
+    const saved = localStorage.getItem('tileTownTotalScore')
+    return saved ? parseInt(saved) : 0
+  })
+  
   const currentLevelData = LEVELS[currentLevel]
+  
+  // Advanced Scoring Functions
+  const calculateScore = (accuracy, timeUsed, isPerfect) => {
+    const maxTime = currentLevelData.selectionTime / 1000
+    const baseScore = Math.round(accuracy * 1000) // Base score out of 1000
+    
+    // Speed bonus: up to 500 points for completing quickly
+    const timeRatio = 1 - (timeUsed / maxTime)
+    const speedBonus = Math.round(timeRatio * 500)
+    
+    // Perfect bonus: 300 points for 100% accuracy
+    const perfectBonus = isPerfect ? 300 : 0
+    
+    // Combo multiplier: increases with perfect streak
+    const comboMultiplier = 1 + (perfectStreak * 0.2) // 20% per perfect level
+    
+    const subtotal = baseScore + speedBonus + perfectBonus
+    const totalScore = Math.round(subtotal * comboMultiplier)
+    
+    return {
+      baseScore,
+      speedBonus,
+      perfectBonus,
+      comboMultiplier,
+      totalScore
+    }
+  }
+  
+  const saveHighScore = (levelNum, score) => {
+    const newHighScores = { ...highScores }
+    if (!newHighScores[levelNum] || score > newHighScores[levelNum]) {
+      newHighScores[levelNum] = score
+      setHighScores(newHighScores)
+      localStorage.setItem('tileTownHighScores', JSON.stringify(newHighScores))
+    }
+  }
+  
+  const updateTotalScore = (points) => {
+    const newTotal = totalGameScore + points
+    setTotalGameScore(newTotal)
+    localStorage.setItem('tileTownTotalScore', newTotal.toString())
+  }
   
   const startGame = (levelNumber = currentLevel) => {
     const level = LEVELS[levelNumber]
@@ -270,6 +331,16 @@ function App() {
     setDrawMode('add')
     setShowSparkles(false)
     setAnimationProgress(0)
+    
+    // Initialize scoring for this level
+    setDetailedScore({
+      baseScore: 0,
+      speedBonus: 0,
+      perfectBonus: 0,
+      comboMultiplier: 1 + (perfectStreak * 0.2),
+      totalScore: 0
+    })
+    setLevelStartTime(Date.now())
   }
   
   const showInstructions = () => {
@@ -503,14 +574,27 @@ function App() {
       }
     }
     
-    const percentage = isCorrect ? 100 : Math.round((userPath.length / (correctPath.length - 2)) * 50) // Partial credit
-    setScore(percentage)
+    // Calculate advanced scoring
+    const accuracy = isCorrect ? 1.0 : Math.min(userPath.length / (correctPath.length - 2), 1.0)
+    const timeUsed = (currentLevelData.selectionTime / 1000) - selectionTimeLeft
+    const isPerfect = isCorrect
     
-    // Trigger sparkles for perfect score
-    if (percentage === 100) {
+    const newScore = calculateScore(accuracy, timeUsed, isPerfect)
+    setDetailedScore(newScore)
+    setScore(Math.round(accuracy * 100)) // Keep old score for compatibility
+    
+    // Update perfect streak
+    if (isPerfect) {
+      setPerfectStreak(prev => prev + 1)
       setShowSparkles(true)
-      setTimeout(() => setShowSparkles(false), 3000) // Show sparkles for 3 seconds
+      setTimeout(() => setShowSparkles(false), 3000)
+    } else {
+      setPerfectStreak(0) // Reset streak on non-perfect
     }
+    
+    // Save high score and update total
+    saveHighScore(currentLevel, newScore.totalScore)
+    updateTotalScore(newScore.totalScore)
     
     // Start creature animation along user's path
     setGamePhase(GAME_PHASES.CREATURE_MOVING)
@@ -646,7 +730,19 @@ function App() {
         </div>
         <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
           <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-2xl w-full">
-            <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">🌟 Choose Your Adventure 🌟</h2>
+            <h2 className="text-3xl font-bold text-slate-800 mb-4 text-center">🌟 Choose Your Adventure 🌟</h2>
+            
+            {/* Total Score Banner */}
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 mb-6 border border-purple-200">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600 mb-1">{totalGameScore.toLocaleString()} Total Points</div>
+                <div className="flex justify-center items-center gap-4 text-sm text-slate-600">
+                  <span>🏆 {Object.keys(highScores).length} Levels Played</span>
+                  {perfectStreak > 0 && <span>🔥 {perfectStreak} Perfect Streak</span>}
+                  <span>🌟 {unlockedLevels.length} Unlocked</span>
+                </div>
+              </div>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {Object.entries(LEVELS).map(([levelNum, level]) => {
@@ -687,6 +783,15 @@ function App() {
                         <p>⏱️ Study: {level.viewTime/1000}s | Select: {level.selectionTime/1000}s</p>
                         <p>🎯 Goal: Get {level.creature} to {level.goal}</p>
                       </div>
+                      
+                      {/* High Score Display */}
+                      {isUnlocked && highScores[levelNum] && (
+                        <div className="mt-3 pt-2 border-t border-slate-200">
+                          <p className="text-xs text-blue-600 font-medium">
+                            🏆 Best Score: {highScores[levelNum].toLocaleString()} pts
+                          </p>
+                        </div>
+                      )}
                       
                       {!isUnlocked && (
                         <p className="text-sm text-orange-600 mt-3 font-medium">
@@ -744,6 +849,10 @@ function App() {
               <div className="flex items-start gap-3">
                 <span className="text-xl">🎉</span>
                 <p><strong>Perfect path = sparkles:</strong> Guide the turtle home for magical celebrations!</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">🏆</span>
+                <p><strong>Advanced scoring:</strong> Earn points for accuracy, speed bonuses, perfect completion, and combo multipliers!</p>
               </div>
             </div>
             <button onClick={backToWelcome} className="w-full mt-6 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors">
@@ -817,12 +926,58 @@ function App() {
               )}
               {gamePhase === GAME_PHASES.RESULT && (
                 <div>
-                  <p className="text-slate-600 mb-2">{score === 100 ? "Perfect! 🎉" : "Good try! 👍"}</p>
-                  <div className="text-2xl font-bold text-green-600">{score}% correct!</div>
+                  <p className="text-slate-600 mb-3">{score === 100 ? "Perfect! 🎉" : "Good try! 👍"}</p>
+                  
+                  {/* Detailed Score Breakdown */}
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-4 border border-blue-200">
+                    <div className="text-3xl font-bold text-blue-600 mb-2">{detailedScore.totalScore.toLocaleString()} Points!</div>
+                    
+                    {/* Score Components */}
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Base Score ({score}% accuracy):</span>
+                        <span className="font-semibold text-blue-600">+{detailedScore.baseScore}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Speed Bonus:</span>
+                        <span className="font-semibold text-green-600">+{detailedScore.speedBonus}</span>
+                      </div>
+                      {detailedScore.perfectBonus > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-600">Perfect Bonus:</span>
+                          <span className="font-semibold text-purple-600">+{detailedScore.perfectBonus}</span>
+                        </div>
+                      )}
+                      {detailedScore.comboMultiplier > 1 && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-600">Streak Multiplier (x{detailedScore.comboMultiplier.toFixed(1)}):</span>
+                          <span className="font-semibold text-orange-600">Applied!</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Streak Info */}
+                    {perfectStreak > 0 && (
+                      <div className="mt-3 pt-2 border-t border-blue-200">
+                        <p className="text-sm text-purple-600 font-medium">🔥 Perfect Streak: {perfectStreak} levels!</p>
+                      </div>
+                    )}
+                    
+                    {/* High Score Info */}
+                    {highScores[currentLevel] && (
+                      <div className="mt-2 text-xs text-slate-500">
+                        Personal Best: {highScores[currentLevel].toLocaleString()} pts
+                        {detailedScore.totalScore > highScores[currentLevel] && 
+                          <span className="text-green-600 font-medium"> • NEW RECORD! 🏆</span>
+                        }
+                      </div>
+                    )}
+                  </div>
+                  
                   {score === 100 ? (
-                    <p className="text-sm text-green-600 mt-1">The {currentLevelData.creature.includes('🐢') ? 'turtle' : 'cat'} made it home! {currentLevelData.goal}</p>
+                    <p className="text-sm text-green-600 mt-1">The {currentLevelData.creature.includes('🐢') ? 'turtle' : currentLevelData.creature.includes('🐱') ? 'cat' : currentLevelData.creature.includes('🐉') ? 'dragon' : 'rabbit'} made it home! {currentLevelData.goal}</p>
                   ) : (
-                    <p className="text-sm text-orange-600 mt-1">The {currentLevelData.creature.includes('🐢') ? 'turtle' : 'cat'} got confused... Try again! 🤔</p>
+                    <p className="text-sm text-orange-600 mt-1">The {currentLevelData.creature.includes('🐢') ? 'turtle' : currentLevelData.creature.includes('🐱') ? 'cat' : currentLevelData.creature.includes('🐉') ? 'dragon' : 'rabbit'} got confused... Try again! 🤔</p>
                   )}
                 </div>
               )}
@@ -1007,8 +1162,22 @@ function App() {
             </div>
             <div className="text-sm text-slate-600">{currentLevelData.gridSize}×{currentLevelData.gridSize} Grid • Path Memory Challenge</div>
             <div className="text-xs text-blue-600 mt-1">Help the {currentLevelData.creature} find {currentLevelData.goal}! </div>
-            <div className="text-xs text-slate-500 mt-2">
-              {unlockedLevels.length > 1 && `🎉 ${unlockedLevels.length} levels unlocked!`}
+            
+            {/* Scoring Information */}
+            <div className="mt-3 pt-2 border-t border-blue-200 space-y-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500">Total Score:</span>
+                <span className="font-bold text-blue-600">{totalGameScore.toLocaleString()} pts</span>
+              </div>
+              {perfectStreak > 0 && (
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-500">Perfect Streak:</span>
+                  <span className="font-bold text-purple-600">🔥 {perfectStreak}</span>
+                </div>
+              )}
+              <div className="text-xs text-slate-500 mt-1">
+                {unlockedLevels.length > 1 && `🎉 ${unlockedLevels.length} levels unlocked!`}
+              </div>
             </div>
           </div>
         </div>
