@@ -51,7 +51,7 @@ const GAME_STATES = {
   LEVEL_SELECT: 'level_select'
 }
 
-// Level configurations
+// Level configurations with multiple path variations
 const LEVELS = {
   1: {
     name: "Turtle's Maze Challenge", 
@@ -60,30 +60,52 @@ const LEVELS = {
     gridSize: 5,
     start: { x: 0, y: 0 },
     end: { x: 4, y: 4 },
-    correctPath: [
-      { x: 0, y: 0 }, // start
-      { x: 1, y: 0 },
-      { x: 2, y: 0 },
-      { x: 3, y: 0 },
-      { x: 3, y: 1 },
-      { x: 3, y: 2 },
-      { x: 2, y: 2 },
-      { x: 1, y: 2 },
-      { x: 0, y: 2 },
-      { x: 0, y: 3 },
-      { x: 1, y: 3 },
-      { x: 2, y: 3 },
-      { x: 3, y: 3 },
-      { x: 4, y: 3 },
-      { x: 4, y: 4 }  // end - complex zigzag path!
+    pathVariations: [
+      {
+        // Variation A: Classic zigzag
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 },
+          { x: 3, y: 1 }, { x: 3, y: 2 }, { x: 2, y: 2 }, { x: 1, y: 2 },
+          { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 2, y: 3 },
+          { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 4, y: 4 }
+        ],
+        obstacles: [
+          { x: 4, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 },
+          { x: 4, y: 1 }, { x: 4, y: 2 }, { x: 3, y: 4 }, { x: 2, y: 4 },
+          { x: 1, y: 4 }, { x: 0, y: 4 }
+        ]
+      },
+      {
+        // Variation B: Diagonal spiral
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 },
+          { x: 4, y: 1 }, { x: 4, y: 2 }, { x: 3, y: 2 }, { x: 2, y: 2 },
+          { x: 1, y: 2 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 },
+          { x: 4, y: 3 }, { x: 4, y: 4 }
+        ],
+        obstacles: [
+          { x: 0, y: 1 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 },
+          { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 }, { x: 1, y: 4 },
+          { x: 2, y: 4 }, { x: 3, y: 4 }
+        ]
+      },
+      {
+        // Variation C: Border hug
+        correctPath: [
+          { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 },
+          { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 },
+          { x: 4, y: 4 }, { x: 4, y: 3 }, { x: 4, y: 2 }, { x: 4, y: 1 },
+          { x: 4, y: 0 }, { x: 3, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 0 },
+          { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 3, y: 2 },
+          { x: 3, y: 3 }, { x: 2, y: 3 }, { x: 2, y: 2 }
+        ],
+        obstacles: [
+          { x: 1, y: 2 }, { x: 1, y: 3 }
+        ]
+      }
     ],
-    obstacles: [
-      { x: 4, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 },
-      { x: 4, y: 1 }, { x: 4, y: 2 }, { x: 3, y: 4 }, { x: 2, y: 4 },
-      { x: 1, y: 4 }, { x: 0, y: 4 }
-    ],
-    viewTime: 3000, // Only 3 seconds to study!
-    selectionTime: 6000, // 6 seconds to recreate
+    viewTime: 3000,
+    selectionTime: 6000,
     background: "from-violet-100 via-purple-50 to-indigo-100"
   },
   2: {
@@ -93,45 +115,52 @@ const LEVELS = {
     gridSize: 6,
     start: { x: 0, y: 0 },
     end: { x: 5, y: 5 },
-    correctPath: [
-      { x: 0, y: 0 }, // start
-      { x: 1, y: 0 },
-      { x: 2, y: 0 },
-      { x: 3, y: 0 },
-      { x: 4, y: 0 },
-      { x: 5, y: 0 },
-      { x: 5, y: 1 },
-      { x: 4, y: 1 },
-      { x: 3, y: 1 },
-      { x: 2, y: 1 },
-      { x: 1, y: 1 },
-      { x: 0, y: 1 },
-      { x: 0, y: 2 },
-      { x: 1, y: 2 },
-      { x: 2, y: 2 },
-      { x: 3, y: 2 },
-      { x: 4, y: 2 },
-      { x: 5, y: 2 },
-      { x: 5, y: 3 },
-      { x: 4, y: 3 },
-      { x: 3, y: 3 },
-      { x: 2, y: 3 },
-      { x: 1, y: 3 },
-      { x: 0, y: 3 },
-      { x: 0, y: 4 },
-      { x: 1, y: 4 },
-      { x: 2, y: 4 },
-      { x: 3, y: 4 },
-      { x: 4, y: 4 },
-      { x: 5, y: 4 },
-      { x: 5, y: 5 }  // end - insane zigzag snake pattern!
+    pathVariations: [
+      {
+        // Variation A: Snake zigzag
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 },
+          { x: 5, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 1 }, { x: 0, y: 1 },
+          { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 },
+          { x: 5, y: 3 }, { x: 4, y: 3 }, { x: 3, y: 3 }, { x: 2, y: 3 }, { x: 1, y: 3 }, { x: 0, y: 3 },
+          { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 },
+          { x: 5, y: 5 }
+        ],
+        obstacles: [
+          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }
+        ]
+      },
+      {
+        // Variation B: Spiral inward
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 },
+          { x: 5, y: 1 }, { x: 5, y: 2 }, { x: 5, y: 3 }, { x: 5, y: 4 }, { x: 5, y: 5 },
+          { x: 4, y: 5 }, { x: 3, y: 5 }, { x: 2, y: 5 }, { x: 1, y: 5 }, { x: 0, y: 5 },
+          { x: 0, y: 4 }, { x: 0, y: 3 }, { x: 0, y: 2 }, { x: 0, y: 1 },
+          { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 },
+          { x: 4, y: 2 }, { x: 4, y: 3 }, { x: 4, y: 4 },
+          { x: 3, y: 4 }, { x: 2, y: 4 }, { x: 1, y: 4 },
+          { x: 1, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 3, y: 3 }, { x: 2, y: 3 }
+        ],
+        obstacles: []
+      },
+      {
+        // Variation C: Diagonal maze
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 0 }, { x: 3, y: 1 }, { x: 4, y: 0 }, 
+          { x: 5, y: 1 }, { x: 5, y: 2 }, { x: 4, y: 3 }, { x: 3, y: 2 }, { x: 2, y: 3 },
+          { x: 1, y: 4 }, { x: 0, y: 3 }, { x: 0, y: 4 }, { x: 0, y: 5 }, { x: 1, y: 5 },
+          { x: 2, y: 4 }, { x: 3, y: 5 }, { x: 4, y: 4 }, { x: 5, y: 5 }
+        ],
+        obstacles: [
+          { x: 1, y: 0 }, { x: 3, y: 0 }, { x: 5, y: 0 }, { x: 0, y: 1 }, { x: 2, y: 1 },
+          { x: 4, y: 1 }, { x: 1, y: 2 }, { x: 4, y: 2 }, { x: 0, y: 2 }, { x: 5, y: 3 },
+          { x: 1, y: 3 }, { x: 3, y: 3 }, { x: 2, y: 5 }, { x: 4, y: 5 }
+        ]
+      }
     ],
-    obstacles: [
-      // Strategic obstacles to force the zigzag path
-      { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }
-    ],
-    viewTime: 2000, // Only 2 seconds to memorize this nightmare!
-    selectionTime: 7000, // 7 seconds to recreate this complex path
+    viewTime: 2000,
+    selectionTime: 7000,
     background: "from-red-100 via-orange-50 to-yellow-100"
   },
   3: {
@@ -141,25 +170,62 @@ const LEVELS = {
     gridSize: 7,
     start: { x: 3, y: 6 },
     end: { x: 3, y: 0 },
-    correctPath: [
-      { x: 3, y: 6 }, // start (bottom center)
-      { x: 2, y: 6 }, { x: 1, y: 6 }, { x: 0, y: 6 }, // go left
-      { x: 0, y: 5 }, { x: 0, y: 4 }, { x: 0, y: 3 }, // go up
-      { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 }, // go right
-      { x: 6, y: 2 }, { x: 6, y: 1 }, // go up
-      { x: 5, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 1 }, // go left
-      { x: 2, y: 0 }, { x: 3, y: 0 } // go up to treasure
+    pathVariations: [
+      {
+        // Variation A: Counter-clockwise spiral
+        correctPath: [
+          { x: 3, y: 6 }, { x: 2, y: 6 }, { x: 1, y: 6 }, { x: 0, y: 6 },
+          { x: 0, y: 5 }, { x: 0, y: 4 }, { x: 0, y: 3 },
+          { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 },
+          { x: 6, y: 2 }, { x: 6, y: 1 },
+          { x: 5, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 1 },
+          { x: 2, y: 0 }, { x: 3, y: 0 }
+        ],
+        obstacles: [
+          { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 },
+          { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 5 },
+          { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 6, y: 4 },
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 },
+          { x: 1, y: 1 }, { x: 0, y: 1 }, { x: 6, y: 1 }
+        ]
+      },
+      {
+        // Variation B: Clockwise spiral
+        correctPath: [
+          { x: 3, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 },
+          { x: 6, y: 5 }, { x: 6, y: 4 }, { x: 6, y: 3 }, { x: 6, y: 2 }, { x: 6, y: 1 }, { x: 6, y: 0 },
+          { x: 5, y: 0 }, { x: 4, y: 0 }, { x: 3, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 },
+          { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 }, { x: 0, y: 5 },
+          { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 },
+          { x: 5, y: 4 }, { x: 5, y: 3 }, { x: 5, y: 2 }, { x: 5, y: 1 },
+          { x: 4, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 1 },
+          { x: 1, y: 2 }, { x: 1, y: 3 }, { x: 1, y: 4 },
+          { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 },
+          { x: 4, y: 3 }, { x: 4, y: 2 }, { x: 3, y: 2 }, { x: 2, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 3 }
+        ],
+        obstacles: [
+          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }
+        ]
+      },
+      {
+        // Variation C: Diagonal climb
+        correctPath: [
+          { x: 3, y: 6 }, { x: 2, y: 5 }, { x: 1, y: 4 }, { x: 0, y: 3 },
+          { x: 1, y: 2 }, { x: 2, y: 1 }, { x: 3, y: 0 }
+        ],
+        obstacles: [
+          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 },
+          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 5 },
+          { x: 0, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 },
+          { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 },
+          { x: 0, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 6, y: 2 },
+          { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 },
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }
+        ]
+      }
     ],
-    obstacles: [
-      // Create spiral tower obstacles
-      { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 },
-      { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 5 },
-      { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 6, y: 4 },
-      { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 },
-      { x: 1, y: 1 }, { x: 0, y: 1 }, { x: 6, y: 1 }
-    ],
-    viewTime: 2500, // 2.5 seconds to study the spiral
-    selectionTime: 8000, // 8 seconds for this complex spiral
+    viewTime: 2500,
+    selectionTime: 8000,
     background: "from-purple-100 via-pink-50 to-red-100"
   },
   4: {
@@ -169,28 +235,66 @@ const LEVELS = {
     gridSize: 8,
     start: { x: 0, y: 0 },
     end: { x: 7, y: 7 },
-    correctPath: [
-      { x: 0, y: 0 }, // start
-      { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 }, // down left edge
-      { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 7, y: 4 }, // across middle
-      { x: 7, y: 3 }, { x: 7, y: 2 }, { x: 7, y: 1 }, { x: 7, y: 0 }, // up right edge 
-      { x: 6, y: 0 }, { x: 5, y: 0 }, { x: 4, y: 0 }, { x: 3, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 0 }, // back across top
-      { x: 1, y: 1 }, { x: 1, y: 2 }, { x: 1, y: 3 }, // down
-      { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 }, // right
-      { x: 6, y: 5 }, { x: 6, y: 6 }, { x: 6, y: 7 }, // down
-      { x: 7, y: 7 } // final step to carrot!
+    pathVariations: [
+      {
+        // Variation A: Border journey
+        correctPath: [
+          { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 },
+          { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 7, y: 4 },
+          { x: 7, y: 3 }, { x: 7, y: 2 }, { x: 7, y: 1 }, { x: 7, y: 0 },
+          { x: 6, y: 0 }, { x: 5, y: 0 }, { x: 4, y: 0 }, { x: 3, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 0 },
+          { x: 1, y: 1 }, { x: 1, y: 2 }, { x: 1, y: 3 },
+          { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 },
+          { x: 6, y: 5 }, { x: 6, y: 6 }, { x: 6, y: 7 }, { x: 7, y: 7 }
+        ],
+        obstacles: [
+          { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 },
+          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 },
+          { x: 0, y: 7 }, { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 3, y: 7 }, { x: 4, y: 7 }, { x: 5, y: 7 },
+          { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 },
+          { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 6, y: 2 },
+          { x: 0, y: 5 }, { x: 7, y: 5 }, { x: 7, y: 6 }
+        ]
+      },
+      {
+        // Variation B: Diagonal snake
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 0 }, { x: 3, y: 1 }, { x: 4, y: 2 }, { x: 5, y: 1 },
+          { x: 6, y: 2 }, { x: 7, y: 3 }, { x: 6, y: 4 }, { x: 5, y: 5 }, { x: 4, y: 6 }, { x: 3, y: 7 },
+          { x: 4, y: 7 }, { x: 5, y: 6 }, { x: 6, y: 7 }, { x: 7, y: 6 }, { x: 7, y: 7 }
+        ],
+        obstacles: [
+          { x: 1, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 },
+          { x: 0, y: 1 }, { x: 2, y: 1 }, { x: 4, y: 1 }, { x: 6, y: 1 }, { x: 7, y: 1 },
+          { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 3, y: 2 }, { x: 5, y: 2 }, { x: 7, y: 2 },
+          { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 },
+          { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 7, y: 4 },
+          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 6, y: 5 }, { x: 7, y: 5 },
+          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 },
+          { x: 0, y: 7 }, { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 5, y: 7 }
+        ]
+      },
+      {
+        // Variation C: Inner spiral
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 },
+          { x: 7, y: 1 }, { x: 7, y: 2 }, { x: 7, y: 3 }, { x: 7, y: 4 }, { x: 7, y: 5 }, { x: 7, y: 6 }, { x: 7, y: 7 },
+          { x: 6, y: 7 }, { x: 5, y: 7 }, { x: 4, y: 7 }, { x: 3, y: 7 }, { x: 2, y: 7 }, { x: 1, y: 7 }, { x: 0, y: 7 },
+          { x: 0, y: 6 }, { x: 0, y: 5 }, { x: 0, y: 4 }, { x: 0, y: 3 }, { x: 0, y: 2 }, { x: 0, y: 1 },
+          { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 },
+          { x: 6, y: 2 }, { x: 6, y: 3 }, { x: 6, y: 4 }, { x: 6, y: 5 }, { x: 6, y: 6 },
+          { x: 5, y: 6 }, { x: 4, y: 6 }, { x: 3, y: 6 }, { x: 2, y: 6 }, { x: 1, y: 6 },
+          { x: 1, y: 5 }, { x: 1, y: 4 }, { x: 1, y: 3 }, { x: 1, y: 2 },
+          { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 },
+          { x: 5, y: 3 }, { x: 5, y: 4 }, { x: 5, y: 5 },
+          { x: 4, y: 5 }, { x: 3, y: 5 }, { x: 2, y: 5 },
+          { x: 2, y: 4 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 4, y: 4 }, { x: 3, y: 4 }
+        ],
+        obstacles: []
+      }
     ],
-    obstacles: [
-      // Strategic maze blocking
-      { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 },
-      { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 },
-      { x: 0, y: 7 }, { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 3, y: 7 }, { x: 4, y: 7 }, { x: 5, y: 7 },
-      { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 },
-      { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 6, y: 2 },
-      { x: 0, y: 5 }, { x: 7, y: 5 }, { x: 7, y: 6 }
-    ],
-    viewTime: 1500, // Only 1.5 seconds! Brutal!
-    selectionTime: 10000, // 10 seconds for this massive maze
+    viewTime: 1500,
+    selectionTime: 10000,
     background: "from-green-100 via-emerald-50 to-teal-100"
   }
 }
@@ -214,7 +318,10 @@ const GAME_PHASES = {
 }
 
 // Helper function to create initial grid
-const createInitialGrid = (level) => {
+const createInitialGrid = (level, pathVariation = null) => {
+  // Use path variation if provided, otherwise use first variation as fallback
+  const variation = pathVariation || level.pathVariations[0]
+  
   const grid = []
   for (let y = 0; y < level.gridSize; y++) {
     const row = []
@@ -224,9 +331,9 @@ const createInitialGrid = (level) => {
         y,
         isStart: x === level.start.x && y === level.start.y,
         isGoal: x === level.end.x && y === level.end.y,
-        isPath: level.correctPath.some(p => p.x === x && p.y === y),
+        isPath: variation.correctPath.some(p => p.x === x && p.y === y),
         isSelectedByUser: false,
-        isObstacle: level.obstacles.some(o => o.x === x && o.y === y),
+        isObstacle: variation.obstacles.some(o => o.x === x && o.y === y),
         isCreatureHere: x === level.start.x && y === level.start.y, // creature starts here
         isTrail: false, // New trail effect
         trailAge: 0 // New trail effect
@@ -242,7 +349,7 @@ function App() {
   const [gamePhase, setGamePhase] = useState(GAME_PHASES.PATH_PREVIEW)
   const [currentLevel, setCurrentLevel] = useState(1)
   const [unlockedLevels, setUnlockedLevels] = useState([1]) // Only level 1 unlocked initially
-  const [grid, setGrid] = useState(createInitialGrid(LEVELS[1]))
+  const [grid, setGrid] = useState(() => createInitialGrid(LEVELS[1]))
   const [timeLeft, setTimeLeft] = useState(LEVELS[1].viewTime / 1000)
   const [selectionTimeLeft, setSelectionTimeLeft] = useState(LEVELS[1].selectionTime / 1000)
   const [score, setScore] = useState(0)
@@ -272,7 +379,25 @@ function App() {
     return saved ? parseInt(saved) : 0
   })
   
+  // Random path selection state
+  const [currentPathVariation, setCurrentPathVariation] = useState(null)
+  
   const currentLevelData = LEVELS[currentLevel]
+  
+  // Path Randomization Functions
+  const selectRandomPathVariation = (levelNumber) => {
+    const level = LEVELS[levelNumber]
+    const randomIndex = Math.floor(Math.random() * level.pathVariations.length)
+    return level.pathVariations[randomIndex]
+  }
+  
+  const getCurrentPath = () => {
+    return currentPathVariation ? currentPathVariation.correctPath : []
+  }
+  
+  const getCurrentObstacles = () => {
+    return currentPathVariation ? currentPathVariation.obstacles : []
+  }
   
   // Advanced Scoring Functions
   const calculateScore = (accuracy, timeUsed, isPerfect) => {
@@ -318,10 +443,17 @@ function App() {
   
   const startGame = (levelNumber = currentLevel) => {
     const level = LEVELS[levelNumber]
+    
+    // Select random path variation for this playthrough
+    const selectedVariation = selectRandomPathVariation(levelNumber)
+    setCurrentPathVariation(selectedVariation)
+    
     setCurrentLevel(levelNumber)
     setGameState(GAME_STATES.PLAYING)
     setGamePhase(GAME_PHASES.PATH_PREVIEW)
-    setGrid(createInitialGrid(level))
+    
+    // Create grid with the selected random variation
+    setGrid(createInitialGrid(level, selectedVariation))
     setTimeLeft(level.viewTime / 1000)
     setSelectionTimeLeft(level.selectionTime / 1000)
     setScore(0)
@@ -560,7 +692,7 @@ function App() {
   const checkPath = () => {
     // Add start and end to user path for comparison
     const fullUserPath = [LEVELS[currentLevel].start, ...userPath, LEVELS[currentLevel].end]
-    const correctPath = LEVELS[currentLevel].correctPath
+    const correctPath = getCurrentPath() // Use the randomly selected path variation
     
     // Check if paths match exactly (same length and same coordinates)
     let isCorrect = fullUserPath.length === correctPath.length
@@ -782,6 +914,7 @@ function App() {
                         <p>📐 Grid: {level.gridSize}×{level.gridSize}</p>
                         <p>⏱️ Study: {level.viewTime/1000}s | Select: {level.selectionTime/1000}s</p>
                         <p>🎯 Goal: Get {level.creature} to {level.goal}</p>
+                        <p className="text-orange-600 font-medium">🎲 {level.pathVariations.length} Random Path Layouts</p>
                       </div>
                       
                       {/* High Score Display */}
@@ -854,6 +987,10 @@ function App() {
                 <span className="text-xl">🏆</span>
                 <p><strong>Advanced scoring:</strong> Earn points for accuracy, speed bonuses, perfect completion, and combo multipliers!</p>
               </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">🎲</span>
+                <p><strong>Random paths:</strong> Every playthrough has a different path layout - stay sharp and adapt quickly!</p>
+              </div>
             </div>
             <button onClick={backToWelcome} className="w-full mt-6 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors">
               Got it!
@@ -897,7 +1034,10 @@ function App() {
             {/* Header */}
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-slate-800 mb-2">{currentLevelData.creature} {currentLevelData.name}</h2>
-              <p className="text-sm text-slate-500">Level {currentLevel}</p>
+              <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+                <span>Level {currentLevel}</span>
+                <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded-full text-xs font-medium">🎲 Random Path</span>
+              </div>
               {gamePhase === GAME_PHASES.PATH_PREVIEW && (
                 <div>
                   <p className="text-slate-600 mb-2">Study the blue path carefully! The {currentLevelData.creature} needs to reach the {currentLevelData.goal}.</p>
