@@ -1,5 +1,107 @@
 import React, { useState, useEffect } from 'react'
 
+// Sound System using Web Audio API
+class SoundSystem {
+  constructor() {
+    this.audioContext = null
+    this.masterVolume = 0.3 // Keep sounds subtle
+    this.init()
+  }
+
+  init() {
+    try {
+      this.audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    } catch (e) {
+      console.log('Web Audio API not supported')
+    }
+  }
+
+  // Create a simple tone
+  createTone(frequency, duration, type = 'sine', volume = 1) {
+    if (!this.audioContext) return
+
+    const oscillator = this.audioContext.createOscillator()
+    const gainNode = this.audioContext.createGain()
+    
+    oscillator.connect(gainNode)
+    gainNode.connect(this.audioContext.destination)
+    
+    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime)
+    oscillator.type = type
+    
+    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime)
+    gainNode.gain.linearRampToValueAtTime(this.masterVolume * volume, this.audioContext.currentTime + 0.01)
+    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration)
+    
+    oscillator.start(this.audioContext.currentTime)
+    oscillator.stop(this.audioContext.currentTime + duration)
+  }
+
+  // Success sound - triumphant chord
+  playSuccess() {
+    this.createTone(523, 0.15, 'sine', 0.8) // C5
+    setTimeout(() => this.createTone(659, 0.15, 'sine', 0.8), 50) // E5
+    setTimeout(() => this.createTone(784, 0.25, 'sine', 0.8), 100) // G5
+  }
+
+  // Failure sound - descending sad tone
+  playFailure() {
+    this.createTone(440, 0.2, 'triangle', 0.6) // A4
+    setTimeout(() => this.createTone(392, 0.2, 'triangle', 0.6), 150) // G4
+    setTimeout(() => this.createTone(329, 0.3, 'triangle', 0.6), 300) // E4
+  }
+
+  // Obstacle hit - harsh buzz
+  playObstacleHit() {
+    this.createTone(200, 0.1, 'sawtooth', 0.4)
+    setTimeout(() => this.createTone(150, 0.1, 'sawtooth', 0.4), 50)
+  }
+
+  // Tile select - gentle click
+  playTileSelect() {
+    this.createTone(800, 0.05, 'square', 0.2)
+  }
+
+  // Tile deselect - lower click
+  playTileDeselect() {
+    this.createTone(600, 0.05, 'square', 0.15)
+  }
+
+  // Creature step - subtle step sound
+  playCreatureStep() {
+    this.createTone(400, 0.08, 'triangle', 0.15)
+  }
+
+  // Level start - gentle chime
+  playLevelStart() {
+    this.createTone(659, 0.1, 'sine', 0.3) // E5
+    setTimeout(() => this.createTone(784, 0.15, 'sine', 0.3), 80) // G5
+  }
+
+  // Timer warning - urgent beep
+  playTimerWarning() {
+    this.createTone(1000, 0.1, 'square', 0.4)
+  }
+
+  // Perfect streak - magical ascending tones
+  playPerfectStreak() {
+    const notes = [523, 659, 784, 1047] // C5, E5, G5, C6
+    notes.forEach((freq, i) => {
+      setTimeout(() => this.createTone(freq, 0.15, 'sine', 0.4), i * 80)
+    })
+  }
+}
+
+// Initialize sound system
+const soundSystem = new SoundSystem()
+
+// Sound helper function to respect user preferences
+const playSound = (soundEnabled, soundFunction) => {
+  if (soundEnabled && soundFunction) {
+    soundFunction()
+  }
+}
+
 // Elegant sparkle animation styles
 const sparkleStyles = `
   @keyframes sparkle-rise {
@@ -54,246 +156,225 @@ const GAME_STATES = {
 // Level configurations with multiple path variations
 const LEVELS = {
   1: {
-    name: "Turtle's Maze Challenge", 
+    name: "Turtle's First Steps", 
     creature: "🐢",
     goal: "🏝️",
-    gridSize: 5,
+    gridSize: 4, // Smaller grid for beginners
+    start: { x: 0, y: 0 },
+    end: { x: 3, y: 3 },
+    pathVariations: [
+      {
+        // Variation A: Simple straight line
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 },
+          { x: 3, y: 1 }, { x: 3, y: 2 }, { x: 3, y: 3 }
+        ],
+        obstacles: [
+          { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }
+        ]
+      },
+      {
+        // Variation B: Simple L-shape
+        correctPath: [
+          { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 },
+          { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }
+        ],
+        obstacles: [
+          { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 1, y: 2 }
+        ]
+      },
+      {
+        // Variation C: Simple diagonal-ish
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 },
+          { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 3, y: 3 }
+        ],
+        obstacles: [
+          { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }
+        ]
+      }
+    ],
+    viewTime: 4000, // More time to study
+    selectionTime: 8000, // More time to select
+    background: "from-violet-100 via-purple-50 to-indigo-100"
+  },
+  2: {
+    name: "Cat's Garden Path",
+    creature: "🐱", 
+    goal: "🐟",
+    gridSize: 5, // Moderate increase from 4x4
     start: { x: 0, y: 0 },
     end: { x: 4, y: 4 },
     pathVariations: [
       {
-        // Variation A: Classic zigzag
+        // Variation A: Simple zigzag
         correctPath: [
-          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 },
-          { x: 3, y: 1 }, { x: 3, y: 2 }, { x: 2, y: 2 }, { x: 1, y: 2 },
-          { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 2, y: 3 },
-          { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 4, y: 4 }
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 },
+          { x: 4, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 1 },
+          { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 },
+          { x: 4, y: 3 }, { x: 3, y: 3 }, { x: 2, y: 3 }, { x: 2, y: 4 },
+          { x: 3, y: 4 }, { x: 4, y: 4 }
         ],
         obstacles: [
-          { x: 4, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 },
-          { x: 4, y: 1 }, { x: 4, y: 2 }, { x: 3, y: 4 }, { x: 2, y: 4 },
-          { x: 1, y: 4 }, { x: 0, y: 4 }
+          { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 },
+          { x: 1, y: 3 }, { x: 1, y: 4 }
         ]
       },
       {
-        // Variation B: Diagonal spiral
+        // Variation B: L-shaped with turns
         correctPath: [
-          { x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 },
-          { x: 4, y: 1 }, { x: 4, y: 2 }, { x: 3, y: 2 }, { x: 2, y: 2 },
-          { x: 1, y: 2 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 },
-          { x: 4, y: 3 }, { x: 4, y: 4 }
+          { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 1, y: 2 },
+          { x: 2, y: 2 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 },
+          { x: 4, y: 2 }, { x: 4, y: 3 }, { x: 4, y: 4 }
         ],
         obstacles: [
-          { x: 0, y: 1 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 },
-          { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 }, { x: 1, y: 4 },
-          { x: 2, y: 4 }, { x: 3, y: 4 }
+          { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 },
+          { x: 1, y: 1 }, { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 2, y: 3 },
+          { x: 3, y: 3 }, { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }
         ]
       },
       {
-        // Variation C: Border hug
+        // Variation C: Staircase pattern
         correctPath: [
-          { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 },
-          { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 },
-          { x: 4, y: 4 }, { x: 4, y: 3 }, { x: 4, y: 2 }, { x: 4, y: 1 },
-          { x: 4, y: 0 }, { x: 3, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 0 },
-          { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 3, y: 2 },
-          { x: 3, y: 3 }, { x: 2, y: 3 }, { x: 2, y: 2 }
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 1, y: 2 },
+          { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 3, y: 3 }, { x: 3, y: 4 },
+          { x: 4, y: 4 }
         ],
         obstacles: [
-          { x: 1, y: 2 }, { x: 1, y: 3 }
+          { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 },
+          { x: 0, y: 1 }, { x: 2, y: 1 }, { x: 4, y: 1 },
+          { x: 0, y: 2 }, { x: 4, y: 2 },
+          { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 4, y: 3 },
+          { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }
         ]
       }
     ],
-    viewTime: 3000,
-    selectionTime: 6000,
-    background: "from-violet-100 via-purple-50 to-indigo-100"
-  },
-  2: {
-    name: "Cat's Nightmare Maze",
-    creature: "🐱", 
-    goal: "🐟",
-    gridSize: 6,
-    start: { x: 0, y: 0 },
-    end: { x: 5, y: 5 },
-    pathVariations: [
-      {
-        // Variation A: Snake zigzag
-        correctPath: [
-          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 },
-          { x: 5, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 1 }, { x: 0, y: 1 },
-          { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 },
-          { x: 5, y: 3 }, { x: 4, y: 3 }, { x: 3, y: 3 }, { x: 2, y: 3 }, { x: 1, y: 3 }, { x: 0, y: 3 },
-          { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 },
-          { x: 5, y: 5 }
-        ],
-        obstacles: [
-          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }
-        ]
-      },
-      {
-        // Variation B: Spiral inward
-        correctPath: [
-          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 },
-          { x: 5, y: 1 }, { x: 5, y: 2 }, { x: 5, y: 3 }, { x: 5, y: 4 }, { x: 5, y: 5 },
-          { x: 4, y: 5 }, { x: 3, y: 5 }, { x: 2, y: 5 }, { x: 1, y: 5 }, { x: 0, y: 5 },
-          { x: 0, y: 4 }, { x: 0, y: 3 }, { x: 0, y: 2 }, { x: 0, y: 1 },
-          { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 },
-          { x: 4, y: 2 }, { x: 4, y: 3 }, { x: 4, y: 4 },
-          { x: 3, y: 4 }, { x: 2, y: 4 }, { x: 1, y: 4 },
-          { x: 1, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 3, y: 3 }, { x: 2, y: 3 }
-        ],
-        obstacles: []
-      },
-      {
-        // Variation C: Diagonal maze
-        correctPath: [
-          { x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 0 }, { x: 3, y: 1 }, { x: 4, y: 0 }, 
-          { x: 5, y: 1 }, { x: 5, y: 2 }, { x: 4, y: 3 }, { x: 3, y: 2 }, { x: 2, y: 3 },
-          { x: 1, y: 4 }, { x: 0, y: 3 }, { x: 0, y: 4 }, { x: 0, y: 5 }, { x: 1, y: 5 },
-          { x: 2, y: 4 }, { x: 3, y: 5 }, { x: 4, y: 4 }, { x: 5, y: 5 }
-        ],
-        obstacles: [
-          { x: 1, y: 0 }, { x: 3, y: 0 }, { x: 5, y: 0 }, { x: 0, y: 1 }, { x: 2, y: 1 },
-          { x: 4, y: 1 }, { x: 1, y: 2 }, { x: 4, y: 2 }, { x: 0, y: 2 }, { x: 5, y: 3 },
-          { x: 1, y: 3 }, { x: 3, y: 3 }, { x: 2, y: 5 }, { x: 4, y: 5 }
-        ]
-      }
-    ],
-    viewTime: 2000,
+    viewTime: 3500, // Moderate decrease
     selectionTime: 7000,
     background: "from-red-100 via-orange-50 to-yellow-100"
   },
   3: {
-    name: "Dragon's Spiral Tower",
+    name: "Dragon's Climbing Challenge",
     creature: "🐉", 
     goal: "💎",
-    gridSize: 7,
-    start: { x: 3, y: 6 },
-    end: { x: 3, y: 0 },
+    gridSize: 6, // Moderate complexity
+    start: { x: 0, y: 5 },
+    end: { x: 5, y: 0 },
     pathVariations: [
       {
-        // Variation A: Counter-clockwise spiral
+        // Variation A: Gentle spiral
         correctPath: [
-          { x: 3, y: 6 }, { x: 2, y: 6 }, { x: 1, y: 6 }, { x: 0, y: 6 },
-          { x: 0, y: 5 }, { x: 0, y: 4 }, { x: 0, y: 3 },
-          { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 },
-          { x: 6, y: 2 }, { x: 6, y: 1 },
-          { x: 5, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 1 },
-          { x: 2, y: 0 }, { x: 3, y: 0 }
+          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 },
+          { x: 5, y: 4 }, { x: 5, y: 3 }, { x: 5, y: 2 }, { x: 5, y: 1 }, { x: 5, y: 0 },
+          { x: 4, y: 0 }, { x: 3, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 },
+          { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 },
+          { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 },
+          { x: 4, y: 3 }, { x: 4, y: 2 }, { x: 4, y: 1 },
+          { x: 3, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 1 },
+          { x: 1, y: 2 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 },
+          { x: 3, y: 2 }, { x: 2, y: 2 }
         ],
-        obstacles: [
-          { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 },
-          { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 5 },
-          { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 6, y: 4 },
-          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 },
-          { x: 1, y: 1 }, { x: 0, y: 1 }, { x: 6, y: 1 }
-        ]
+        obstacles: []
       },
       {
-        // Variation B: Clockwise spiral
+        // Variation B: Mountain climb
         correctPath: [
-          { x: 3, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 },
-          { x: 6, y: 5 }, { x: 6, y: 4 }, { x: 6, y: 3 }, { x: 6, y: 2 }, { x: 6, y: 1 }, { x: 6, y: 0 },
-          { x: 5, y: 0 }, { x: 4, y: 0 }, { x: 3, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 },
-          { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 }, { x: 0, y: 5 },
+          { x: 0, y: 5 }, { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 3 },
+          { x: 3, y: 3 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 5, y: 1 },
+          { x: 5, y: 0 }
+        ],
+        obstacles: [
           { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 },
-          { x: 5, y: 4 }, { x: 5, y: 3 }, { x: 5, y: 2 }, { x: 5, y: 1 },
-          { x: 4, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 1 },
-          { x: 1, y: 2 }, { x: 1, y: 3 }, { x: 1, y: 4 },
-          { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 },
-          { x: 4, y: 3 }, { x: 4, y: 2 }, { x: 3, y: 2 }, { x: 2, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 3 }
-        ],
-        obstacles: [
-          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }
+          { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 },
+          { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 },
+          { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 },
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }
         ]
       },
       {
-        // Variation C: Diagonal climb
+        // Variation C: Zigzag ascent
         correctPath: [
-          { x: 3, y: 6 }, { x: 2, y: 5 }, { x: 1, y: 4 }, { x: 0, y: 3 },
-          { x: 1, y: 2 }, { x: 2, y: 1 }, { x: 3, y: 0 }
+          { x: 0, y: 5 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 3 },
+          { x: 2, y: 2 }, { x: 1, y: 2 }, { x: 2, y: 1 }, { x: 3, y: 1 },
+          { x: 4, y: 0 }, { x: 5, y: 0 }
         ],
         obstacles: [
-          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 },
-          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 5 },
-          { x: 0, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 },
-          { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 },
-          { x: 0, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 6, y: 2 },
-          { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 },
-          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }
+          { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 },
+          { x: 0, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 },
+          { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 },
+          { x: 0, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 },
+          { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 },
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }
         ]
       }
     ],
-    viewTime: 2500,
+    viewTime: 3000,
     selectionTime: 8000,
     background: "from-purple-100 via-pink-50 to-red-100"
   },
   4: {
-    name: "Rabbit's Garden Maze",
+    name: "Rabbit's Master Maze",
     creature: "🐰", 
     goal: "🥕",
-    gridSize: 8,
+    gridSize: 7, // Most challenging size
     start: { x: 0, y: 0 },
-    end: { x: 7, y: 7 },
+    end: { x: 6, y: 6 },
     pathVariations: [
       {
-        // Variation A: Border journey
+        // Variation A: Complex spiral
         correctPath: [
-          { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 },
-          { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 7, y: 4 },
-          { x: 7, y: 3 }, { x: 7, y: 2 }, { x: 7, y: 1 }, { x: 7, y: 0 },
-          { x: 6, y: 0 }, { x: 5, y: 0 }, { x: 4, y: 0 }, { x: 3, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 0 },
-          { x: 1, y: 1 }, { x: 1, y: 2 }, { x: 1, y: 3 },
-          { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 },
-          { x: 6, y: 5 }, { x: 6, y: 6 }, { x: 6, y: 7 }, { x: 7, y: 7 }
-        ],
-        obstacles: [
-          { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 },
-          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 },
-          { x: 0, y: 7 }, { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 3, y: 7 }, { x: 4, y: 7 }, { x: 5, y: 7 },
-          { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 },
-          { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 6, y: 2 },
-          { x: 0, y: 5 }, { x: 7, y: 5 }, { x: 7, y: 6 }
-        ]
-      },
-      {
-        // Variation B: Diagonal snake
-        correctPath: [
-          { x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 0 }, { x: 3, y: 1 }, { x: 4, y: 2 }, { x: 5, y: 1 },
-          { x: 6, y: 2 }, { x: 7, y: 3 }, { x: 6, y: 4 }, { x: 5, y: 5 }, { x: 4, y: 6 }, { x: 3, y: 7 },
-          { x: 4, y: 7 }, { x: 5, y: 6 }, { x: 6, y: 7 }, { x: 7, y: 6 }, { x: 7, y: 7 }
-        ],
-        obstacles: [
-          { x: 1, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 },
-          { x: 0, y: 1 }, { x: 2, y: 1 }, { x: 4, y: 1 }, { x: 6, y: 1 }, { x: 7, y: 1 },
-          { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 3, y: 2 }, { x: 5, y: 2 }, { x: 7, y: 2 },
-          { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 },
-          { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 7, y: 4 },
-          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 6, y: 5 }, { x: 7, y: 5 },
-          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 },
-          { x: 0, y: 7 }, { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 5, y: 7 }
-        ]
-      },
-      {
-        // Variation C: Inner spiral
-        correctPath: [
-          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 },
-          { x: 7, y: 1 }, { x: 7, y: 2 }, { x: 7, y: 3 }, { x: 7, y: 4 }, { x: 7, y: 5 }, { x: 7, y: 6 }, { x: 7, y: 7 },
-          { x: 6, y: 7 }, { x: 5, y: 7 }, { x: 4, y: 7 }, { x: 3, y: 7 }, { x: 2, y: 7 }, { x: 1, y: 7 }, { x: 0, y: 7 },
-          { x: 0, y: 6 }, { x: 0, y: 5 }, { x: 0, y: 4 }, { x: 0, y: 3 }, { x: 0, y: 2 }, { x: 0, y: 1 },
-          { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 },
-          { x: 6, y: 2 }, { x: 6, y: 3 }, { x: 6, y: 4 }, { x: 6, y: 5 }, { x: 6, y: 6 },
-          { x: 5, y: 6 }, { x: 4, y: 6 }, { x: 3, y: 6 }, { x: 2, y: 6 }, { x: 1, y: 6 },
-          { x: 1, y: 5 }, { x: 1, y: 4 }, { x: 1, y: 3 }, { x: 1, y: 2 },
-          { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 },
-          { x: 5, y: 3 }, { x: 5, y: 4 }, { x: 5, y: 5 },
-          { x: 4, y: 5 }, { x: 3, y: 5 }, { x: 2, y: 5 },
-          { x: 2, y: 4 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 4, y: 4 }, { x: 3, y: 4 }
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 },
+          { x: 6, y: 1 }, { x: 6, y: 2 }, { x: 6, y: 3 }, { x: 6, y: 4 }, { x: 6, y: 5 }, { x: 6, y: 6 },
+          { x: 5, y: 6 }, { x: 4, y: 6 }, { x: 3, y: 6 }, { x: 2, y: 6 }, { x: 1, y: 6 }, { x: 0, y: 6 },
+          { x: 0, y: 5 }, { x: 0, y: 4 }, { x: 0, y: 3 }, { x: 0, y: 2 }, { x: 0, y: 1 },
+          { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 },
+          { x: 5, y: 2 }, { x: 5, y: 3 }, { x: 5, y: 4 }, { x: 5, y: 5 },
+          { x: 4, y: 5 }, { x: 3, y: 5 }, { x: 2, y: 5 }, { x: 1, y: 5 },
+          { x: 1, y: 4 }, { x: 1, y: 3 }, { x: 1, y: 2 },
+          { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 },
+          { x: 4, y: 3 }, { x: 4, y: 4 },
+          { x: 3, y: 4 }, { x: 2, y: 4 },
+          { x: 2, y: 3 }, { x: 3, y: 3 }
         ],
         obstacles: []
+      },
+      {
+        // Variation B: Maze with dead ends
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 2 }, { x: 1, y: 3 }, { x: 2, y: 4 },
+          { x: 3, y: 3 }, { x: 4, y: 4 }, { x: 5, y: 3 }, { x: 6, y: 4 },
+          { x: 5, y: 5 }, { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 }
+        ],
+        obstacles: [
+          { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 },
+          { x: 0, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 },
+          { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 6, y: 2 },
+          { x: 0, y: 3 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 6, y: 3 },
+          { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 3, y: 4 }, { x: 5, y: 4 },
+          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 6, y: 5 },
+          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 6, y: 6 }
+        ]
+      },
+      {
+        // Variation C: Diagonal challenge
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 1 }, { x: 3, y: 0 }, { x: 4, y: 1 }, 
+          { x: 5, y: 2 }, { x: 6, y: 1 }, { x: 6, y: 2 }, { x: 5, y: 3 }, { x: 4, y: 4 },
+          { x: 3, y: 5 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 4, y: 5 }, { x: 5, y: 6 },
+          { x: 6, y: 5 }, { x: 6, y: 6 }
+        ],
+        obstacles: [
+          { x: 2, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 },
+          { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 3, y: 1 }, { x: 5, y: 1 },
+          { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 },
+          { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 6, y: 3 },
+          { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 },
+          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 },
+          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 4, y: 6 }, { x: 6, y: 6 }
+        ]
       }
     ],
-    viewTime: 1500,
+    viewTime: 2500, // Reduced time for challenge
     selectionTime: 10000,
     background: "from-green-100 via-emerald-50 to-teal-100"
   }
@@ -382,6 +463,12 @@ function App() {
   // Random path selection state
   const [currentPathVariation, setCurrentPathVariation] = useState(null)
   
+  // Sound settings
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const saved = localStorage.getItem('tileTownSoundEnabled')
+    return saved !== null ? JSON.parse(saved) : true
+  })
+  
   const currentLevelData = LEVELS[currentLevel]
   
   // Path Randomization Functions
@@ -441,6 +528,17 @@ function App() {
     localStorage.setItem('tileTownTotalScore', newTotal.toString())
   }
   
+  // Sound toggle function
+  const toggleSound = () => {
+    const newSoundEnabled = !soundEnabled
+    setSoundEnabled(newSoundEnabled)
+    localStorage.setItem('tileTownSoundEnabled', JSON.stringify(newSoundEnabled))
+    // Play a brief test sound when enabling
+    if (newSoundEnabled) {
+      setTimeout(() => playSound(newSoundEnabled, () => soundSystem.playTileSelect()), 100)
+    }
+  }
+
   const startGame = (levelNumber = currentLevel) => {
     const level = LEVELS[levelNumber]
     
@@ -473,6 +571,9 @@ function App() {
       totalScore: 0
     })
     setLevelStartTime(Date.now())
+    
+    // Play level start sound
+    setTimeout(() => playSound(soundEnabled, () => soundSystem.playLevelStart()), 100)
   }
   
   const showInstructions = () => {
@@ -611,6 +712,7 @@ function App() {
         // Flash red briefly to show they hit a hidden obstacle
         tile.isHiddenObstacleHit = true
         setGrid([...newGrid])
+        playSound(soundEnabled, () => soundSystem.playObstacleHit()) // Play obstacle hit sound
         setTimeout(() => {
           tile.isHiddenObstacleHit = false
           setGrid([...newGrid])
@@ -620,7 +722,15 @@ function App() {
     }
     
     // Toggle tile selection
+    const wasSelected = tile.isSelectedByUser
     tile.isSelectedByUser = !tile.isSelectedByUser
+    
+    // Play appropriate sound
+    if (tile.isSelectedByUser) {
+      playSound(soundEnabled, () => soundSystem.playTileSelect())
+    } else {
+      playSound(soundEnabled, () => soundSystem.playTileDeselect())
+    }
     
     // Update user path array
     const pathCoord = { x, y }
@@ -676,12 +786,14 @@ function App() {
     if (drawMode === 'add' && !tile.isSelectedByUser) {
       // Add tile to selection
       tile.isSelectedByUser = true
+      playSound(soundEnabled, () => soundSystem.playTileSelect())
       if (!userPath.some(p => p.x === x && p.y === y)) {
         setUserPath(prev => [...prev, pathCoord])
       }
     } else if (drawMode === 'remove' && tile.isSelectedByUser) {
       // Remove tile from selection
       tile.isSelectedByUser = false
+      playSound(soundEnabled, () => soundSystem.playTileDeselect())
       setUserPath(prev => prev.filter(p => !(p.x === x && p.y === y)))
     }
     
@@ -690,24 +802,24 @@ function App() {
   
   // Check if user's path matches the correct path
   const checkPath = () => {
-    // Add start and end to user path for comparison
-    const fullUserPath = [LEVELS[currentLevel].start, ...userPath, LEVELS[currentLevel].end]
     const correctPath = getCurrentPath() // Use the randomly selected path variation
     
-    // Check if paths match exactly (same length and same coordinates)
-    let isCorrect = fullUserPath.length === correctPath.length
+    // Extract intermediate tiles from correct path (excluding start and end)
+    const correctIntermediateTiles = correctPath.slice(1, -1) // Remove first and last elements
     
-    if (isCorrect) {
-      for (let i = 0; i < fullUserPath.length; i++) {
-        if (fullUserPath[i].x !== correctPath[i].x || fullUserPath[i].y !== correctPath[i].y) {
-          isCorrect = false
-          break
-        }
-      }
-    }
+    // Check if user selected exactly the correct intermediate tiles (order doesn't matter)
+    const userHasCorrectTiles = correctIntermediateTiles.length === userPath.length &&
+      correctIntermediateTiles.every(correctTile => 
+        userPath.some(userTile => userTile.x === correctTile.x && userTile.y === correctTile.y)
+      )
+    
+    // For animation, we need the full path in correct order
+    const fullUserPath = userHasCorrectTiles ? correctPath : [LEVELS[currentLevel].start, ...userPath, LEVELS[currentLevel].end]
+    
+    const isCorrect = userHasCorrectTiles
     
     // Calculate advanced scoring
-    const accuracy = isCorrect ? 1.0 : Math.min(userPath.length / (correctPath.length - 2), 1.0)
+    const accuracy = isCorrect ? 1.0 : Math.min(userPath.length / correctIntermediateTiles.length, 1.0)
     const timeUsed = (currentLevelData.selectionTime / 1000) - selectionTimeLeft
     const isPerfect = isCorrect
     
@@ -715,20 +827,30 @@ function App() {
     setDetailedScore(newScore)
     setScore(Math.round(accuracy * 100)) // Keep old score for compatibility
     
-    // Update perfect streak
+    // Update perfect streak and play sounds
     if (isPerfect) {
-      setPerfectStreak(prev => prev + 1)
+      setPerfectStreak(prev => {
+        const newStreak = prev + 1
+        // Play success sound immediately
+        playSound(soundEnabled, () => soundSystem.playSuccess())
+        // Play special streak sound for multiple perfects
+        if (newStreak > 1) {
+          setTimeout(() => playSound(soundEnabled, () => soundSystem.playPerfectStreak()), 500)
+        }
+        return newStreak
+      })
       setShowSparkles(true)
       setTimeout(() => setShowSparkles(false), 3000)
     } else {
       setPerfectStreak(0) // Reset streak on non-perfect
+      playSound(soundEnabled, () => soundSystem.playFailure()) // Play failure sound
     }
     
     // Save high score and update total
     saveHighScore(currentLevel, newScore.totalScore)
     updateTotalScore(newScore.totalScore)
     
-    // Start creature animation along user's path
+    // Start creature animation along the correct path if user got it right, otherwise user's path
     setGamePhase(GAME_PHASES.CREATURE_MOVING)
     animateCreature(fullUserPath, isCorrect)
   }
@@ -745,6 +867,11 @@ function App() {
         
         // Update creature position
         setCreaturePosition(path[stepIndex])
+        
+        // Play creature step sound (except for first step)
+        if (stepIndex > 0) {
+          playSound(soundEnabled, () => soundSystem.playCreatureStep())
+        }
         
         // Update grid to show creature position with trail
         const newGrid = [...grid]
@@ -828,6 +955,10 @@ function App() {
             checkPath()
             return 0
           }
+          // Play warning sound when time is running low
+          if (prev <= 3 && prev > 1) {
+            playSound(soundEnabled, () => soundSystem.playTimerWarning())
+          }
           return prev - 1
         })
       }, 1000)
@@ -874,6 +1005,19 @@ function App() {
                   <span>🌟 {unlockedLevels.length} Unlocked</span>
                 </div>
               </div>
+            </div>
+            
+            {/* Sound Toggle */}
+            <div className="mb-6 p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <button 
+                onClick={toggleSound}
+                className="flex items-center justify-center gap-2 w-full text-slate-700 hover:text-slate-900 transition-colors"
+              >
+                <span className="text-lg">{soundEnabled ? '🔊' : '🔇'}</span>
+                <span className="text-sm font-medium">
+                  Sound Effects: {soundEnabled ? 'ON' : 'OFF'}
+                </span>
+              </button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -958,6 +1102,20 @@ function App() {
         <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
           <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-lg w-full">
             <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">How to Play</h2>
+            
+            {/* Sound Toggle */}
+            <div className="mb-6 p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <button 
+                onClick={toggleSound}
+                className="flex items-center justify-center gap-2 w-full text-slate-700 hover:text-slate-900 transition-colors"
+              >
+                <span className="text-lg">{soundEnabled ? '🔊' : '🔇'}</span>
+                <span className="text-sm font-medium">
+                  Sound Effects: {soundEnabled ? 'ON' : 'OFF'}
+                </span>
+              </button>
+            </div>
+            
             <div className="space-y-4 text-slate-700">
               <div className="flex items-start gap-3">
                 <span className="text-xl">👀</span>
@@ -1271,6 +1429,19 @@ function App() {
                 An evil wizard has scattered the town's creatures across magical tiles. 
                 <span className="font-semibold text-slate-900"> Remember the patterns</span> and bring them home!
               </p>
+            </div>
+
+            {/* Sound Toggle */}
+            <div className="mb-6 p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <button 
+                onClick={toggleSound}
+                className="flex items-center justify-center gap-2 w-full text-slate-700 hover:text-slate-900 transition-colors"
+              >
+                <span className="text-lg">{soundEnabled ? '🔊' : '🔇'}</span>
+                <span className="text-sm font-medium">
+                  Sound Effects: {soundEnabled ? 'ON' : 'OFF'}
+                </span>
+              </button>
             </div>
 
           {/* Action Buttons */}
