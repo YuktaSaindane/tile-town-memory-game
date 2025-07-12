@@ -377,6 +377,70 @@ const LEVELS = {
     viewTime: 2500, // Reduced time for challenge
     selectionTime: 10000,
     background: "from-green-100 via-emerald-50 to-teal-100"
+  },
+  5: {
+    name: "Deer's Enchanted Forest",
+    creature: "🦌", 
+    goal: "🌺",
+    gridSize: 8, // Maximum complexity - 8x8 grid
+    start: { x: 0, y: 0 },
+    end: { x: 7, y: 7 },
+    pathVariations: [
+      {
+        // Variation A: Grand spiral - massive inward spiral covering most of the grid
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 },
+          { x: 7, y: 1 }, { x: 7, y: 2 }, { x: 7, y: 3 }, { x: 7, y: 4 }, { x: 7, y: 5 }, { x: 7, y: 6 }, { x: 7, y: 7 },
+          { x: 6, y: 7 }, { x: 5, y: 7 }, { x: 4, y: 7 }, { x: 3, y: 7 }, { x: 2, y: 7 }, { x: 1, y: 7 }, { x: 0, y: 7 },
+          { x: 0, y: 6 }, { x: 0, y: 5 }, { x: 0, y: 4 }, { x: 0, y: 3 }, { x: 0, y: 2 }, { x: 0, y: 1 },
+          { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 },
+          { x: 6, y: 2 }, { x: 6, y: 3 }, { x: 6, y: 4 }, { x: 6, y: 5 }, { x: 6, y: 6 },
+          { x: 5, y: 6 }, { x: 4, y: 6 }, { x: 3, y: 6 }, { x: 2, y: 6 }, { x: 1, y: 6 },
+          { x: 1, y: 5 }, { x: 1, y: 4 }, { x: 1, y: 3 }, { x: 1, y: 2 },
+          { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 },
+          { x: 5, y: 3 }, { x: 5, y: 4 }, { x: 5, y: 5 },
+          { x: 4, y: 5 }, { x: 3, y: 5 }, { x: 2, y: 5 },
+          { x: 2, y: 4 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 4, y: 4 }, { x: 3, y: 4 }
+        ],
+        obstacles: []
+      },
+      {
+        // Variation B: Cross pattern with maze branches
+        correctPath: [
+          { x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 4 }, { x: 5, y: 5 }, { x: 6, y: 6 }, { x: 7, y: 7 }
+        ],
+        obstacles: [
+          { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 },
+          { x: 0, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 7, y: 1 },
+          { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 6, y: 2 }, { x: 7, y: 2 },
+          { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 }, { x: 7, y: 3 },
+          { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 7, y: 4 },
+          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 6, y: 5 }, { x: 7, y: 5 },
+          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 7, y: 6 },
+          { x: 0, y: 7 }, { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 3, y: 7 }, { x: 4, y: 7 }, { x: 5, y: 7 }, { x: 6, y: 7 }
+        ]
+      },
+      {
+        // Variation C: Serpentine mega-maze - longest possible path
+        correctPath: [
+          { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 },
+          { x: 7, y: 1 }, { x: 7, y: 2 }, { x: 6, y: 2 }, { x: 5, y: 2 }, { x: 4, y: 2 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 }, { x: 7, y: 3 },
+          { x: 7, y: 4 }, { x: 6, y: 4 }, { x: 5, y: 4 }, { x: 4, y: 4 }, { x: 3, y: 4 }, { x: 2, y: 4 }, { x: 1, y: 4 }, { x: 0, y: 4 },
+          { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 3, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 6 }, { x: 7, y: 6 }, { x: 7, y: 7 }
+        ],
+        obstacles: [
+          { x: 1, y: 0 }, { x: 2, y: 0 },
+          { x: 0, y: 2 }, { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 },
+          { x: 0, y: 3 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 7, y: 5 },
+          { x: 4, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 5 }, { x: 7, y: 5 },
+          { x: 0, y: 6 }, { x: 1, y: 6 }, { x: 2, y: 6 },
+          { x: 0, y: 7 }, { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 3, y: 7 }, { x: 4, y: 7 }, { x: 5, y: 7 }, { x: 6, y: 7 }
+        ]
+      }
+    ],
+    viewTime: 2000, // Very challenging - only 2 seconds to study!
+    selectionTime: 12000, // More time needed due to complexity
+    background: "from-emerald-100 via-green-50 to-lime-100"
   }
 }
 
@@ -469,6 +533,23 @@ function App() {
     return saved !== null ? JSON.parse(saved) : true
   })
   
+  // Master completion tracking
+  const [isMasterComplete, setIsMasterComplete] = useState(() => {
+    const saved = localStorage.getItem('tileTownMasterComplete')
+    return saved ? JSON.parse(saved) : false
+  })
+  
+  // Power-up system
+  const [powerUps, setPowerUps] = useState(() => {
+    const saved = localStorage.getItem('tileTownPowerUps')
+    return saved ? JSON.parse(saved) : { extraTime: 0, revealHint: 0, obstacleScan: 0 }
+  })
+  const [activePowerUps, setActivePowerUps] = useState({
+    extraTime: false,
+    revealHint: false,
+    obstacleScan: false
+  })
+  
   const currentLevelData = LEVELS[currentLevel]
   
   // Path Randomization Functions
@@ -539,6 +620,100 @@ function App() {
     }
   }
 
+  // Power-up system functions
+  const savePowerUps = (newPowerUps) => {
+    setPowerUps(newPowerUps)
+    localStorage.setItem('tileTownPowerUps', JSON.stringify(newPowerUps))
+  }
+
+  const awardPowerUps = (score, isPerfect, timeUsed) => {
+    const newPowerUps = { ...powerUps }
+    
+    // Award based on performance
+    if (isPerfect) {
+      newPowerUps.extraTime += 1
+      if (score > 1500) newPowerUps.revealHint += 1 // High score bonus
+    }
+    
+    // Award for speed (completed in first half of time)
+    const maxTime = currentLevelData.selectionTime / 1000
+    if (timeUsed < maxTime / 2) {
+      newPowerUps.obstacleScan += 1
+    }
+    
+    // Award for perfect streaks
+    if (perfectStreak >= 2) {
+      newPowerUps.revealHint += 1
+    }
+    
+    savePowerUps(newPowerUps)
+  }
+
+  const usePowerUp = (type) => {
+    if (powerUps[type] <= 0) return false
+    
+    const newPowerUps = { ...powerUps }
+    newPowerUps[type] -= 1
+    savePowerUps(newPowerUps)
+    
+    setActivePowerUps(prev => ({ ...prev, [type]: true }))
+    playSound(soundEnabled, () => soundSystem.createTone(800, 0.2, 'sine', 0.4))
+    
+    // Apply power-up effects
+    switch (type) {
+      case 'extraTime':
+        setSelectionTimeLeft(prev => prev + 5) // Add 5 seconds
+        break
+      case 'revealHint':
+        revealHintTiles()
+        break
+      case 'obstacleScan':
+        revealObstacles()
+        break
+    }
+    
+    return true
+  }
+
+  const revealHintTiles = () => {
+    const correctPath = getCurrentPath()
+    const intermediateTiles = correctPath.slice(1, -1) // Exclude start/end
+    const hintTiles = intermediateTiles.slice(0, 3) // Show first 3 tiles
+    
+    const newGrid = [...grid]
+    hintTiles.forEach(tile => {
+      const gridTile = newGrid[tile.y][tile.x]
+      gridTile.isHintRevealed = true
+    })
+    setGrid(newGrid)
+    
+    // Remove hint after 2 seconds
+    setTimeout(() => {
+      const clearedGrid = [...grid]
+      clearedGrid.forEach(row => row.forEach(tile => tile.isHintRevealed = false))
+      setGrid(clearedGrid)
+      setActivePowerUps(prev => ({ ...prev, revealHint: false }))
+    }, 2000)
+  }
+
+  const revealObstacles = () => {
+    const newGrid = [...grid]
+    newGrid.forEach(row => row.forEach(tile => {
+      if (tile.isObstacle) {
+        tile.isObstacleRevealed = true
+      }
+    }))
+    setGrid(newGrid)
+    
+    // Remove reveal after 3 seconds
+    setTimeout(() => {
+      const clearedGrid = [...grid]
+      clearedGrid.forEach(row => row.forEach(tile => tile.isObstacleRevealed = false))
+      setGrid(clearedGrid)
+      setActivePowerUps(prev => ({ ...prev, obstacleScan: false }))
+    }, 3000)
+  }
+
   const startGame = (levelNumber = currentLevel) => {
     const level = LEVELS[levelNumber]
     
@@ -591,7 +766,24 @@ function App() {
   const unlockNextLevel = () => {
     const nextLevel = currentLevel + 1
     if (LEVELS[nextLevel] && !unlockedLevels.includes(nextLevel)) {
-      setUnlockedLevels([...unlockedLevels, nextLevel])
+      const newUnlockedLevels = [...unlockedLevels, nextLevel]
+      setUnlockedLevels(newUnlockedLevels)
+      
+      // Check for master completion (all 5 levels unlocked)
+      if (newUnlockedLevels.length >= 5 && !isMasterComplete) {
+        setIsMasterComplete(true)
+        localStorage.setItem('tileTownMasterComplete', 'true')
+        // Play special master completion sound
+        setTimeout(() => {
+          playSound(soundEnabled, () => {
+            // Epic completion fanfare
+            const masterNotes = [523, 659, 784, 1047, 1319] // C5, E5, G5, C6, E6
+            masterNotes.forEach((freq, i) => {
+              setTimeout(() => soundSystem.createTone(freq, 0.3, 'sine', 0.6), i * 200)
+            })
+          })
+        }, 1000)
+      }
     }
   }
   
@@ -624,6 +816,16 @@ function App() {
       content = "❌"
       bgColor = "bg-red-400"
       borderColor = "border-red-600"
+    } else if (tile.isObstacleRevealed && !tile.isStart && !tile.isGoal) {
+      // Show revealed obstacle during power-up usage
+      content = "🚫"
+      bgColor = "bg-red-300"
+      borderColor = "border-red-500"
+    } else if (tile.isHintRevealed && !tile.isStart && !tile.isGoal) {
+      // Show hinted correct path tile during power-up usage
+      content = "💡"
+      bgColor = "bg-yellow-300"
+      borderColor = "border-yellow-500"
     } else if (gamePhase === GAME_PHASES.PATH_PREVIEW && tile.isPath && !tile.isStart && !tile.isGoal) {
       // Show correct path during preview
       bgColor = "bg-blue-400"
@@ -850,6 +1052,9 @@ function App() {
     saveHighScore(currentLevel, newScore.totalScore)
     updateTotalScore(newScore.totalScore)
     
+    // Award power-ups based on performance
+    awardPowerUps(newScore.totalScore, isPerfect, timeUsed)
+    
     // Start creature animation along the correct path if user got it right, otherwise user's path
     setGamePhase(GAME_PHASES.CREATURE_MOVING)
     animateCreature(fullUserPath, isCorrect)
@@ -1002,8 +1207,19 @@ function App() {
                 <div className="flex justify-center items-center gap-4 text-sm text-slate-600">
                   <span>🏆 {Object.keys(highScores).length} Levels Played</span>
                   {perfectStreak > 0 && <span>🔥 {perfectStreak} Perfect Streak</span>}
-                  <span>🌟 {unlockedLevels.length} Unlocked</span>
+                  <span>🌟 {unlockedLevels.length}/5 Unlocked</span>
                 </div>
+                {/* Master Completion Badge */}
+                {isMasterComplete && (
+                  <div className="mt-3 pt-2 border-t border-purple-200">
+                    <div className="flex items-center justify-center gap-2 text-lg font-bold text-purple-600">
+                      <span>👑</span>
+                      <span>TILE TOWN MASTER</span>
+                      <span>👑</span>
+                    </div>
+                    <div className="text-sm text-purple-500">Congratulations! You've conquered all levels!</div>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -1149,6 +1365,10 @@ function App() {
                 <span className="text-xl">🎲</span>
                 <p><strong>Random paths:</strong> Every playthrough has a different path layout - stay sharp and adapt quickly!</p>
               </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">✨</span>
+                <p><strong>Power-ups:</strong> Earn power-ups by completing levels perfectly! Use Extra Time (⏱️), Reveal Hints (💡), or Obstacle Scan (🔍) to help you succeed!</p>
+              </div>
             </div>
             <button onClick={backToWelcome} className="w-full mt-6 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors">
               Got it!
@@ -1270,6 +1490,22 @@ function App() {
                         }
                       </div>
                     )}
+                    
+                    {/* Power-Up Earnings */}
+                    {score === 100 && (
+                      <div className="mt-2 p-2 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="text-xs text-purple-600 font-medium text-center">✨ Power-Ups Earned! ✨</div>
+                        <div className="flex justify-center gap-2 mt-1 text-xs">
+                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">⏱️ +1 Extra Time</span>
+                          {detailedScore.totalScore > 1500 && (
+                            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">💡 +1 Hint</span>
+                          )}
+                          {perfectStreak >= 2 && (
+                            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">💡 +1 Streak Bonus</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   {score === 100 ? (
@@ -1334,6 +1570,72 @@ function App() {
               </div>
             )}
             
+            {/* Power-Up Bar */}
+            {gamePhase === GAME_PHASES.PATH_SELECTION && (
+              <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200">
+                <div className="text-sm font-medium text-purple-700 mb-2 text-center">✨ Power-Ups Available</div>
+                <div className="flex justify-center gap-2">
+                  {/* Extra Time Power-Up */}
+                  <button
+                    onClick={() => usePowerUp('extraTime')}
+                    disabled={powerUps.extraTime <= 0 || activePowerUps.extraTime}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      powerUps.extraTime > 0 && !activePowerUps.extraTime
+                        ? 'bg-green-500 hover:bg-green-600 text-white hover:scale-105'
+                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    }`}
+                    title="Add 5 extra seconds"
+                  >
+                    ⏱️ +5s
+                    <div className="text-xs">{powerUps.extraTime}</div>
+                  </button>
+                  
+                  {/* Reveal Hint Power-Up */}
+                  <button
+                    onClick={() => usePowerUp('revealHint')}
+                    disabled={powerUps.revealHint <= 0 || activePowerUps.revealHint}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      powerUps.revealHint > 0 && !activePowerUps.revealHint
+                        ? 'bg-yellow-500 hover:bg-yellow-600 text-white hover:scale-105'
+                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    }`}
+                    title="Reveal 3 correct tiles for 2 seconds"
+                  >
+                    💡 Hint
+                    <div className="text-xs">{powerUps.revealHint}</div>
+                  </button>
+                  
+                  {/* Obstacle Scan Power-Up */}
+                  <button
+                    onClick={() => usePowerUp('obstacleScan')}
+                    disabled={powerUps.obstacleScan <= 0 || activePowerUps.obstacleScan}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      powerUps.obstacleScan > 0 && !activePowerUps.obstacleScan
+                        ? 'bg-red-500 hover:bg-red-600 text-white hover:scale-105'
+                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    }`}
+                    title="Reveal obstacles for 3 seconds"
+                  >
+                    🔍 Scan
+                    <div className="text-xs">{powerUps.obstacleScan}</div>
+                  </button>
+                </div>
+                
+                {/* Active Power-Up Indicators */}
+                <div className="mt-2 flex justify-center gap-2 text-xs">
+                  {activePowerUps.extraTime && (
+                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">⏱️ Extra Time Active</span>
+                  )}
+                  {activePowerUps.revealHint && (
+                    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">💡 Hint Active</span>
+                  )}
+                  {activePowerUps.obstacleScan && (
+                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full">🔍 Scan Active</span>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="space-y-2">
               {gamePhase === GAME_PHASES.PATH_SELECTION && (
@@ -1343,7 +1645,7 @@ function App() {
                     disabled={userPath.length === 0}
                     className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-colors"
                   >
-                    {currentLevelData.creature} Send {currentLevelData.creature.includes('🐢') ? 'Turtle' : 'Cat'}!
+                    {currentLevelData.creature} Send {currentLevelData.creature.includes('🐢') ? 'Turtle' : currentLevelData.creature.includes('🐱') ? 'Cat' : currentLevelData.creature.includes('🐉') ? 'Dragon' : currentLevelData.creature.includes('🐰') ? 'Rabbit' : 'Deer'}!
                   </button>
                   <button 
                     onClick={() => {
@@ -1474,6 +1776,18 @@ function App() {
             <div className="text-sm text-slate-600">{currentLevelData.gridSize}×{currentLevelData.gridSize} Grid • Path Memory Challenge</div>
             <div className="text-xs text-blue-600 mt-1">Help the {currentLevelData.creature} find {currentLevelData.goal}! </div>
             
+            {/* Master Completion Badge */}
+            {isMasterComplete && (
+              <div className="mt-3 pt-2 border-t border-blue-200">
+                <div className="flex items-center justify-center gap-2 text-sm font-bold text-purple-600">
+                  <span>👑</span>
+                  <span>TILE TOWN MASTER</span>
+                  <span>👑</span>
+                </div>
+                <div className="text-xs text-purple-500 text-center mt-1">All levels conquered!</div>
+              </div>
+            )}
+            
             {/* Scoring Information */}
             <div className="mt-3 pt-2 border-t border-blue-200 space-y-1">
               <div className="flex justify-between items-center text-xs">
@@ -1487,7 +1801,32 @@ function App() {
                 </div>
               )}
               <div className="text-xs text-slate-500 mt-1">
-                {unlockedLevels.length > 1 && `🎉 ${unlockedLevels.length} levels unlocked!`}
+                {unlockedLevels.length > 1 && `🎉 ${unlockedLevels.length}/5 levels unlocked!`}
+              </div>
+            </div>
+            
+            {/* Power-Up Inventory */}
+            <div className="mt-3 pt-2 border-t border-purple-200">
+              <div className="text-xs text-purple-600 font-medium mb-1 text-center">✨ Power-Up Inventory</div>
+              <div className="flex justify-center gap-3 text-xs">
+                <div className="flex items-center gap-1">
+                  <span className="text-green-600">⏱️</span>
+                  <span className="text-slate-600">Extra Time:</span>
+                  <span className="font-bold text-green-600">{powerUps.extraTime}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-yellow-600">💡</span>
+                  <span className="text-slate-600">Hints:</span>
+                  <span className="font-bold text-yellow-600">{powerUps.revealHint}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-red-600">🔍</span>
+                  <span className="text-slate-600">Scans:</span>
+                  <span className="font-bold text-red-600">{powerUps.obstacleScan}</span>
+                </div>
+              </div>
+              <div className="text-xs text-slate-500 mt-1 text-center">
+                Earn power-ups by completing levels perfectly!
               </div>
             </div>
           </div>
