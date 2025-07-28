@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
-// Nature Expedition Sound System
-class NatureExpeditionSounds {
+// Nature Level Sound System
+class NatureLevelSounds {
   constructor() {
     this.audioContext = null
     this.masterGain = null
@@ -206,37 +206,37 @@ class NatureExpeditionSounds {
   }
 }
 
-// Enhanced Nature Expedition Sound System with Themes and Controls
-class EnhancedNatureExpeditionSounds extends NatureExpeditionSounds {
+// Enhanced Nature Level Sound System with Themes and Controls
+class EnhancedNatureLevelSounds extends NatureLevelSounds {
   constructor() {
     super()
     this.themes = {
       forest: {
-        name: "🌲 Forest Expedition",
+        name: "🌲 Forest Level",
         ambientSounds: ['windThroughTrees', 'birdCall', 'leavesRustle'],
         footstepBase: 'grass',
         ambientVolume: 0.04
       },
       mountain: {
-        name: "🏔️ Mountain Expedition", 
+        name: "🏔️ Mountain Level", 
         ambientSounds: ['windThroughTrees', 'distantEcho', 'rockSlide'],
         footstepBase: 'stone',
         ambientVolume: 0.05
       },
       desert: {
-        name: "🏜️ Desert Expedition",
+        name: "🏜️ Desert Level",
         ambientSounds: ['windDunes', 'distantCoyote', 'sandShift'],
         footstepBase: 'sand',
         ambientVolume: 0.03
       },
       jungle: {
-        name: "🌴 Jungle Expedition",
+        name: "🌴 Jungle Level",
         ambientSounds: ['jungleBirds', 'insectChirp', 'distantMonkey'],
         footstepBase: 'wood',
         ambientVolume: 0.06
       },
       arctic: {
-        name: "🧊 Arctic Expedition",
+        name: "🧊 Arctic Level",
         ambientSounds: ['icyWind', 'snowCrunch', 'distantWolf'],
         footstepBase: 'snow',
         ambientVolume: 0.02
@@ -694,7 +694,7 @@ class EnhancedNatureExpeditionSounds extends NatureExpeditionSounds {
 }
 
 // Global enhanced sound system instance
-let natureSounds = new EnhancedNatureExpeditionSounds()
+let natureSounds = new EnhancedNatureLevelSounds()
 
 // Helper function to ensure audio is initialized
 const ensureAudioInitialized = async () => {
@@ -708,8 +708,8 @@ const ensureAudioInitialized = async () => {
 const ACHIEVEMENTS = {
   FIRST_STEPS: {
     id: 'first_steps',
-    title: 'First Expedition',
-    description: 'Complete your first expedition successfully',
+    title: 'First Level',
+    description: 'Complete your first level successfully',
     icon: '🗺️',
     unlock: (stats) => stats.levelsCompleted >= 1
   },
@@ -727,9 +727,9 @@ const ACHIEVEMENTS = {
     icon: '⚡',
     unlock: (stats) => stats.fastestTime > 0 && stats.fastestTime < 3
   },
-  EXPEDITION_MASTER: {
-    id: 'expedition_master',
-    title: 'Expedition Master',
+  LEVEL_MASTER: {
+    id: 'level_master',
+    title: 'Level Master',
     description: 'Lead 3 consecutive flawless rescue missions',
     icon: '🔥',
     unlock: (stats) => stats.maxStreak >= 3
@@ -737,21 +737,21 @@ const ACHIEVEMENTS = {
   SUPPLY_GATHERER: {
     id: 'supply_gatherer',
     title: 'Supply Gatherer',
-    description: 'Collect 10 expedition supplies during your adventures',
+    description: 'Collect 10 level supplies during your adventures',
     icon: '🎒',
     unlock: (stats) => stats.totalPowerUpsEarned >= 10
   },
   DANGER_SCOUT: {
     id: 'danger_scout',
     title: 'Danger Scout',
-    description: 'Navigate 5 expeditions without hitting any traps',
+    description: 'Navigate 5 levels without hitting any traps',
     icon: '🛡️',
     unlock: (stats) => stats.cleanCompletions >= 5
   },
   LEGENDARY_EXPLORER: {
     id: 'legendary_explorer',
     title: 'Legendary Explorer',
-    description: 'Unlock all 5 expedition territories',
+    description: 'Unlock all 5 level territories',
     icon: '🏆',
     unlock: (stats) => stats.levelsUnlocked >= 5
   },
@@ -765,7 +765,7 @@ const ACHIEVEMENTS = {
   TREASURE_HUNTER: {
     id: 'treasure_hunter',
     title: 'Treasure Hunter',
-    description: 'Accumulate 50,000 expedition points',
+    description: 'Accumulate 50,000 level points',
     icon: '💎',
     unlock: (stats) => stats.totalScore >= 50000
   },
@@ -908,7 +908,7 @@ const LEVELS = {
     background: "from-violet-100 via-purple-50 to-indigo-100"
   },
   2: {
-    name: "Cat's Fishing Expedition",
+    name: "Cat's Fishing Level",
     creature: "🐱", 
     goal: "🐟",
     gridSize: 5,
@@ -961,7 +961,7 @@ const LEVELS = {
     background: "from-purple-100 via-pink-50 to-red-100"
   },
   4: {
-    name: "Rabbit's Carrot Expedition",
+    name: "Rabbit's Carrot Level",
     creature: "🐰", 
     goal: "🥕",
     gridSize: 7,
@@ -985,7 +985,7 @@ const LEVELS = {
     background: "from-green-100 via-emerald-50 to-teal-100"
   },
   5: {
-    name: "Deer's Mystical Forest Journey",
+    name: "Deer's Mystical Forest Level",
     creature: "🦌", 
     goal: "🌺",
     gridSize: 8,
@@ -1515,7 +1515,7 @@ function App() {
             
             {/* Theme Selection */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-slate-700 mb-3">Expedition Theme</h3>
+              <h3 className="text-lg font-semibold text-slate-700 mb-3">Level Theme</h3>
               <div className="grid grid-cols-1 gap-2">
                 {Object.entries(natureSounds.themes).map(([key, theme]) => (
                   <button
@@ -1573,7 +1573,7 @@ function App() {
             <div className="bg-slate-50 rounded-lg p-4">
               <h4 className="font-semibold text-slate-700 mb-2">🌲 Current Theme: {natureSounds.themes[soundTheme].name}</h4>
               <p className="text-sm text-slate-600 mb-3">
-                Experience immersive nature sounds that change based on your expedition theme. 
+                Experience immersive nature sounds that change based on your level theme. 
                 Each theme features unique ambient sounds and terrain-appropriate footsteps.
               </p>
               <div className="text-xs text-slate-500 space-y-1">
@@ -1843,6 +1843,9 @@ function App() {
           }, 300)
         }
       })
+      
+      // Unlock next level if this level was completed perfectly
+      unlockNextLevel()
     } else {
       setPerfectStreak(0)
       
@@ -2041,13 +2044,13 @@ function App() {
         </div>
         <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
           <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-2xl w-full">
-            <h2 className="text-3xl font-bold text-slate-800 mb-4 text-center">🗺️ Choose Your Expedition 🗺️</h2>
+            <h2 className="text-3xl font-bold text-slate-800 mb-4 text-center">🗺️ Choose Your Level 🗺️</h2>
             
             <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 mb-6 border border-purple-200">
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600 mb-1">{totalGameScore.toLocaleString()} Expedition Points</div>
+                <div className="text-2xl font-bold text-purple-600 mb-1">{totalGameScore.toLocaleString()} Level Points</div>
                 <div className="flex justify-center items-center gap-4 text-sm text-slate-600">
-                  <span>🗺️ {Object.keys(highScores).length} Expeditions Completed</span>
+                  <span>🗺️ {Object.keys(highScores).length} Levels Completed</span>
                   {perfectStreak > 0 && <span>🔥 {perfectStreak} Perfect Streak</span>}
                   <span>🌟 {unlockedLevels.length}/5 Territories Explored</span>
                 </div>
@@ -2058,7 +2061,7 @@ function App() {
                       <span>MASTER EXPLORER</span>
                       <span>👑</span>
                     </div>
-                    <div className="text-sm text-purple-500">Congratulations! You've conquered all expeditions!</div>
+                    <div className="text-sm text-purple-500">Congratulations! You've conquered all levels!</div>
                   </div>
                 )}
               </div>
@@ -2094,7 +2097,7 @@ function App() {
                     
                     <div className="text-center">
                       <div className="text-4xl mb-2">{level.creature}</div>
-                      <h3 className="text-xl font-bold text-slate-800 mb-2">Expedition {levelNum}</h3>
+                      <h3 className="text-xl font-bold text-slate-800 mb-2">Level {levelNum}</h3>
                       <p className="text-lg text-slate-600 mb-3">{level.name}</p>
                       <div className="text-sm text-slate-500 space-y-1">
                         <p>📐 Territory: {level.gridSize}×{level.gridSize}</p>
@@ -2106,14 +2109,14 @@ function App() {
                       {isUnlocked && highScores[levelNum] && (
                         <div className="mt-3 pt-2 border-t border-slate-200">
                           <p className="text-xs text-blue-600 font-medium">
-                            🏆 Best Expedition Score: {highScores[levelNum].toLocaleString()} pts
+                            🏆 Best Level Score: {highScores[levelNum].toLocaleString()} pts
                           </p>
                         </div>
                       )}
                       
                       {!isUnlocked && (
                         <p className="text-sm text-orange-600 mt-3 font-medium">
-                          Complete previous expedition to unlock!
+                          Complete previous level to unlock!
                         </p>
                       )}
                     </div>
@@ -2142,7 +2145,7 @@ function App() {
         </div>
         <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
           <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-8 max-w-4xl w-full">
-            <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">🏆 Expedition Achievements</h2>
+            <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">🏆 Level Achievements</h2>
             
             <div className="mb-6 text-center">
               <div className="text-lg text-slate-600">
@@ -2192,11 +2195,11 @@ function App() {
             </div>
 
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-6 border border-blue-200">
-              <h3 className="text-lg font-bold text-slate-800 mb-3 text-center">📊 Your Expedition Statistics</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-3 text-center">📊 Your Level Statistics</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
                   <div className="text-2xl font-bold text-blue-600">{gameStats.levelsCompleted}</div>
-                  <div className="text-xs text-slate-600">Expeditions Completed</div>
+                  <div className="text-xs text-slate-600">Levels Completed</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-green-600">{gameStats.perfectCompletions}</div>
@@ -2204,7 +2207,7 @@ function App() {
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-purple-600">{gameStats.totalScore.toLocaleString()}</div>
-                  <div className="text-xs text-slate-600">Total Expedition Points</div>
+                  <div className="text-xs text-slate-600">Total Level Points</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-orange-600">{gameStats.maxStreak}</div>
@@ -2266,11 +2269,11 @@ function App() {
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-xl">🎲</span>
-                <p><strong>Random routes:</strong> Every expedition has a different path layout - stay sharp and adapt quickly!</p>
+                <p><strong>Random routes:</strong> Every level has a different path layout - stay sharp and adapt quickly!</p>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-xl">🎒</span>
-                <p><strong>Expedition supplies:</strong> Earn supplies by completing expeditions perfectly! Use Extra Time (⏱️), Ancient Maps (💡), or Scout Reports (🔍)!</p>
+                <p><strong>Level supplies:</strong> Earn supplies by completing levels perfectly! Use Extra Time (⏱️), Ancient Maps (💡), or Scout Reports (🔍)!</p>
               </div>
             </div>
             <button onClick={backToWelcome} className="w-full mt-6 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors">
@@ -2332,7 +2335,7 @@ function App() {
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-slate-800 mb-2">{currentLevelData.creature} {currentLevelData.name}</h2>
               <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
-                <span>Expedition {currentLevel}</span>
+                <span>Level {currentLevel}</span>
                 <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded-full text-xs font-medium">🎲 Random Route</span>
               </div>
               {gamePhase === GAME_PHASES.PATH_PREVIEW && (
@@ -2350,7 +2353,7 @@ function App() {
               )}
               {gamePhase === GAME_PHASES.CREATURE_MOVING && (
                 <div>
-                  <p className="text-slate-600 mb-2">The brave {currentLevelData.creature.includes('🐢') ? 'turtle' : currentLevelData.creature.includes('🐱') ? 'cat' : currentLevelData.creature.includes('🐉') ? 'dragon' : 'rabbit'} is following your expedition route...</p>
+                  <p className="text-slate-600 mb-2">The brave {currentLevelData.creature.includes('🐢') ? 'turtle' : currentLevelData.creature.includes('🐱') ? 'cat' : currentLevelData.creature.includes('🐉') ? 'dragon' : 'rabbit'} is following your level route...</p>
                   <div className="text-lg text-blue-600 mb-2">Watch the adventure unfold!</div>
                   <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
                     <div 
@@ -2358,15 +2361,15 @@ function App() {
                       style={{width: `${animationProgress}%`}}
                     ></div>
                   </div>
-                  <div className="text-sm text-slate-500">{animationProgress}% expedition complete</div>
+                  <div className="text-sm text-slate-500">{animationProgress}% level complete</div>
                 </div>
               )}
               {gamePhase === GAME_PHASES.RESULT && (
                 <div>
-                  <p className="text-slate-600 mb-3">{score === 100 ? "Mission Success! 🎉" : "Expedition continues! 👍"}</p>
+                  <p className="text-slate-600 mb-3">{score === 100 ? "Mission Success! 🎉" : "Level continues! 👍"}</p>
                   
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-4 border border-blue-200">
-                    <div className="text-3xl font-bold text-blue-600 mb-2">{detailedScore.totalScore.toLocaleString()} Expedition Points!</div>
+                    <div className="text-3xl font-bold text-blue-600 mb-2">{detailedScore.totalScore.toLocaleString()} Level Points!</div>
                     
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
@@ -2385,7 +2388,7 @@ function App() {
                       )}
                       {detailedScore.comboMultiplier > 1 && (
                         <div className="flex justify-between">
-                          <span className="text-slate-600">Expedition Streak Multiplier (x{detailedScore.comboMultiplier.toFixed(1)}):</span>
+                          <span className="text-slate-600">Level Streak Multiplier (x{detailedScore.comboMultiplier.toFixed(1)}):</span>
                           <span className="font-semibold text-orange-600">Applied!</span>
                         </div>
                       )}
@@ -2393,7 +2396,7 @@ function App() {
                     
                     {perfectStreak > 0 && (
                       <div className="mt-3 pt-2 border-t border-blue-200">
-                        <p className="text-sm text-purple-600 font-medium">🔥 Perfect Expedition Streak: {perfectStreak} territories!</p>
+                        <p className="text-sm text-purple-600 font-medium">🔥 Perfect Level Streak: {perfectStreak} territories!</p>
                       </div>
                     )}
                     
@@ -2401,14 +2404,14 @@ function App() {
                       <div className="mt-2 text-xs text-slate-500">
                         Personal Best: {highScores[currentLevel].toLocaleString()} pts
                         {detailedScore.totalScore > highScores[currentLevel] && 
-                          <span className="text-green-600 font-medium"> • NEW EXPEDITION RECORD! 🏆</span>
+                          <span className="text-green-600 font-medium"> • NEW LEVEL RECORD! 🏆</span>
                         }
                       </div>
                     )}
                     
                     {score === 100 && (
                       <div className="mt-2 p-2 bg-purple-50 rounded-lg border border-purple-200">
-                        <div className="text-xs text-purple-600 font-medium text-center">🎒 Expedition Supplies Earned!</div>
+                        <div className="text-xs text-purple-600 font-medium text-center">🎒 Level Supplies Earned!</div>
                         <div className="flex justify-center gap-2 mt-1 text-xs">
                           <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">⏱️ +1 Extra Time</span>
                           {detailedScore.totalScore > 1500 && (
@@ -2573,15 +2576,15 @@ function App() {
                     onClick={() => startGame(currentLevel)}
                     className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
                   >
-                    🎮 Retry Expedition
+                    🎮 Retry Level
                   </button>
                   
-                  {score === 100 && unlockedLevels.includes(currentLevel + 1) && LEVELS[currentLevel + 1] && (
+                  {score === 100 && LEVELS[currentLevel + 1] && (
                     <button 
                       onClick={() => startGame(currentLevel + 1)}
                       className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
                     >
-                      🌟 Next Expedition: {LEVELS[currentLevel + 1].name}
+                      🌟 Next Level: {LEVELS[currentLevel + 1].name}
                     </button>
                   )}
                   
@@ -2589,7 +2592,7 @@ function App() {
                     onClick={showLevelSelect}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                   >
-                    🗺️ Choose Expedition
+                    🗺️ Choose Level
                   </button>
                 </div>
               )}
@@ -2655,7 +2658,7 @@ function App() {
           <div className="mb-8">
             <div className="text-5xl mb-4">🗺️</div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-2">
-              Expedition Quest
+              Level Quest
             </h1>
             <p className="text-lg text-slate-600 font-medium">
               Brave creatures have ventured into uncharted territories seeking legendary treasures! 
@@ -2674,14 +2677,14 @@ function App() {
             <button onClick={() => startGame(currentLevel)} className="group w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold text-lg py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/25 transform hover:-translate-y-1 active:translate-y-0 active:shadow-lg">
               <span className="flex items-center justify-center gap-2">
                 <span className="group-hover:scale-110 transition-transform">🗺️</span>
-                Continue Expedition {currentLevel}
+                Continue Level {currentLevel}
               </span>
             </button>
             
             <button onClick={showLevelSelect} className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium py-3 px-8 rounded-xl transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5">
               <span className="flex items-center justify-center gap-2">
                 <span>🌟</span>
-                Choose Expedition
+                Choose Level
               </span>
             </button>
             
@@ -2707,7 +2710,7 @@ function App() {
           <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
             <div className="flex items-center justify-center gap-2 mb-1">
               <span className="text-lg">{currentLevelData.creature}</span>
-              <span className="font-semibold text-slate-800">Expedition {currentLevel}: {currentLevelData.name}</span>
+              <span className="font-semibold text-slate-800">Level {currentLevel}: {currentLevelData.name}</span>
             </div>
             <div className="text-sm text-slate-600">{currentLevelData.gridSize}×{currentLevelData.gridSize} Territory • Navigation Challenge</div>
             <div className="text-xs text-blue-600 mt-1">Guide the brave {currentLevelData.creature} to the precious {currentLevelData.goal}! </div>
@@ -2719,13 +2722,13 @@ function App() {
                   <span>MASTER EXPLORER</span>
                   <span>👑</span>
                 </div>
-                <div className="text-xs text-purple-500 text-center mt-1">All expeditions conquered!</div>
+                <div className="text-xs text-purple-500 text-center mt-1">All levels conquered!</div>
               </div>
             )}
             
             <div className="mt-3 pt-2 border-t border-blue-200 space-y-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-500">Total Expedition Points:</span>
+                <span className="text-slate-500">Total Level Points:</span>
                 <span className="font-bold text-blue-600">{totalGameScore.toLocaleString()} pts</span>
               </div>
               {perfectStreak > 0 && (
@@ -2740,7 +2743,7 @@ function App() {
             </div>
             
             <div className="mt-3 pt-2 border-t border-purple-200">
-              <div className="text-xs text-purple-600 font-medium mb-1 text-center">🎒 Expedition Supplies</div>
+              <div className="text-xs text-purple-600 font-medium mb-1 text-center">🎒 Level Supplies</div>
               <div className="flex justify-center gap-3 text-xs">
                 <div className="flex items-center gap-1">
                   <span className="text-green-600">⏱️</span>
@@ -2759,7 +2762,7 @@ function App() {
                 </div>
               </div>
               <div className="text-xs text-slate-500 mt-1 text-center">
-                Earn supplies by completing expeditions perfectly!
+                Earn supplies by completing levels perfectly!
               </div>
             </div>
           </div>

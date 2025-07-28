@@ -1,6 +1,6 @@
-# 🏘️ Tile Town: Nature Expedition
+# 🏘️ Tile Town: Nature Level
 
-A sophisticated memory-based puzzle game where players guide adorable creatures through treacherous terrain to reach their goals. Help the animals navigate complex paths while avoiding obstacles in this beautifully crafted expedition adventure!
+A sophisticated memory-based puzzle game where players guide adorable creatures through treacherous terrain to reach their goals. Help the animals navigate complex paths while avoiding obstacles in this beautifully crafted level adventure!
 
 ## 🎮 Game Concept
 
@@ -21,16 +21,16 @@ The evil wizard has scrambled the memory of Tile Town's cute animal residents! A
 
 ### 🎯 Game Levels
 1. **Turtle's Island Quest** 🐢 → 🏝️ (4x4 grid)
-2. **Cat's Fishing Expedition** 🐱 → 🐟 (5x5 grid)
+2. **Cat's Fishing Level** 🐱 → 🐟 (5x5 grid)
 3. **Dragon's Treasure Hunt** 🐉 → 💎 (6x6 grid)
-4. **Rabbit's Carrot Expedition** 🐰 → 🥕 (7x7 grid)
+4. **Rabbit's Carrot Level** 🐰 → 🥕 (7x7 grid)
 5. **Deer's Mystical Forest Journey** 🦌 → 🌺 (8x8 grid)
 
 ### 🏆 Achievement System
-- **First Expedition**: Complete your first level
+- **First Level**: Complete your first level
 - **Perfect Navigator**: Guide a creature flawlessly
 - **Speed Explorer**: Complete in under 3 seconds
-- **Expedition Master**: 3 consecutive perfect runs
+- **Level Master**: 3 consecutive perfect runs
 - **Supply Gatherer**: Collect 10 power-ups
 - **Danger Scout**: 5 clean completions
 - **Legendary Explorer**: Unlock all territories
@@ -128,4 +128,4 @@ Tile Town combines classic memory game mechanics with modern web technologies to
 
 ---
 
-**Ready to embark on your nature expedition? Run `npm run dev` and start helping the creatures find their way home!** 🌟
+**Ready to embark on your nature level? Run `npm run dev` and start helping the creatures find their way home!** 🌟
